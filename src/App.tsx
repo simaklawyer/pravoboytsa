@@ -2,13 +2,17 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import Onboarding from './pages/Onboarding'
 import Home from './pages/Home'
+import Sections from './pages/Sections'
+import SectionDetail from './pages/SectionDetail'
+import Search from './pages/Search'
+import Profile from './pages/Profile'
+import Article from './pages/Article'
 import { useUserStore } from './store/userStore'
 
 function App() {
   const role = useUserStore((s) => s.role)
 
   useEffect(() => {
-    // Telegram WebApp init
     const tg = (window as any).Telegram?.WebApp
     if (tg) {
       tg.ready()
@@ -26,7 +30,12 @@ function App() {
           element={role ? <Navigate to="/home" replace /> : <Onboarding />}
         />
         <Route path="/home" element={<Home />} />
-        {/* Дальше будут: /sections, /article/:id, /search, /profile */}
+        <Route path="/sections" element={<Sections />} />
+        <Route path="/section/:id" element={<SectionDetail />} />
+        <Route path="/search" element={<Search />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/article/:id" element={<Article />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   )
