@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useUserStore } from '../store/userStore'
+import { useCaseStore } from '../store/caseStore'
 import { sections } from '../data/sections'
 import BottomNav from '../components/BottomNav'
 
@@ -21,10 +22,10 @@ const quickActions = [
 
 export default function Home() {
   const role = useUserStore((s) => s.role)
+  const caseCount = useCaseStore((s) => s.cases.length)
 
   return (
     <div className="min-h-full pb-24 safe-top">
-      {/* Header */}
       <div className="px-5 pt-6 pb-4">
         <motion.div
           initial={{ opacity: 0, y: -8 }}
@@ -47,15 +48,35 @@ export default function Home() {
         </motion.div>
       </div>
 
-      {/* Search bar */}
-      <div className="px-5 mb-6">
+      <div className="px-5 mb-5">
         <Link to="/search" className="card flex items-center gap-3 px-4 py-3.5 block">
           <span className="text-text-muted">🔍</span>
           <span className="text-text-muted text-[15px]">Что вас интересует?</span>
         </Link>
       </div>
 
-      {/* Quick actions */}
+      <div className="px-5 mb-6">
+        <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
+          Инструменты
+        </h2>
+        <div className="grid grid-cols-3 gap-2.5">
+          <Link to="/navigator" className="card p-3 text-center hover:border-accent/30 transition-all">
+            <div className="text-xl mb-1">🧭</div>
+            <div className="text-xs font-medium leading-snug">Где я в деле</div>
+          </Link>
+          <Link to="/case" className="card p-3 text-center hover:border-accent/30 transition-all">
+            <div className="text-xl mb-1">📋</div>
+            <div className="text-xs font-medium leading-snug">
+              {caseCount === 0 ? 'Моё дело' : `Дел: ${caseCount}`}
+            </div>
+          </Link>
+          <Link to="/draft" className="card p-3 text-center hover:border-accent/30 transition-all">
+            <div className="text-xl mb-1">✍️</div>
+            <div className="text-xs font-medium leading-snug">Рапорт</div>
+          </Link>
+        </div>
+      </div>
+
       <div className="px-5 mb-8">
         <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
           Быстрые действия
@@ -81,7 +102,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sections */}
       <div className="px-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">
@@ -118,7 +138,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Bottom note */}
       <div className="px-5 mt-8 mb-4">
         <div className="rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm text-accent-light">
           🔒 Мы не собираем персональные данные. Только анонимная статистика просмотров.
