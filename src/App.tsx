@@ -7,6 +7,9 @@ import SectionDetail from './pages/SectionDetail'
 import Search from './pages/Search'
 import Profile from './pages/Profile'
 import Article from './pages/Article'
+import Navigator from './pages/Navigator'
+import CasePage from './pages/Case'
+import Draft from './pages/Draft'
 import { useUserStore } from './store/userStore'
 
 function App() {
@@ -35,6 +38,9 @@ function App() {
         <Route path="/search" element={<Search />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/article/:id" element={<Article />} />
+        <Route path="/navigator" element={<Navigator />} />
+        <Route path="/case" element={<CasePage />} />
+        <Route path="/draft" element={<Draft />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
