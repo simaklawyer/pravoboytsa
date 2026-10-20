@@ -48,7 +48,7 @@ export const sections: Section[] = [
     title: 'Защита прав',
     description: 'Жалобы, прокуратура, суды, документы',
     icon: '⚖️',
-    count: 2,
+    count: 3,
   },
   {
     id: 'service',
@@ -143,6 +143,13 @@ export const articles: ArticleMeta[] = [
     title: 'Как правильно написать рапорт',
     summary: 'Структура, экземпляры и что делать, если не принимают',
     tags: ['рапорт', 'документы'],
+  },
+  {
+    id: 'legal-3',
+    sectionId: 'legal',
+    title: 'Лестница защиты: от рапорта до исполнения',
+    summary: 'Шесть ступеней, чтобы не прыгать через шаги',
+    tags: ['стадии', 'суд', 'срок'],
   },
   {
     id: 'service-1',
