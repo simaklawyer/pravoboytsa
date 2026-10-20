@@ -46,15 +46,15 @@ export default function Onboarding() {
 
   return (
     <div className="min-h-full flex flex-col px-5 pt-10 pb-8 safe-top safe-bottom">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="mb-8"
       >
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-xl">
+        <div className="flex items-center gap-3 mb-1">
+          <div className="w-11 h-11 rounded-2xl bg-accent/20 border border-accent/25
+                          flex items-center justify-center text-xl shadow-glow">
             🛡️
           </div>
           <div>
@@ -63,45 +63,44 @@ export default function Onboarding() {
           </div>
         </div>
 
-        <h2 className="text-2xl font-semibold mt-6 leading-tight">
+        <h2 className="text-[26px] font-semibold mt-8 leading-tight tracking-tight">
           Кто вы?
         </h2>
-        <p className="text-text-secondary mt-2 text-[15px] leading-relaxed">
-          Выберите один раз — приложение покажет именно то, что нужно вам.
+        <p className="text-text-secondary mt-2 text-[15px] leading-relaxed max-w-[320px]">
+          Выберите один раз — приложение поднимет вверх то, что нужно именно вам.
         </p>
       </motion.div>
 
-      {/* Role cards */}
-      <div className="flex flex-col gap-3 flex-1">
+      <div className="flex flex-col gap-2.5 flex-1">
         {roles.map((role, index) => (
           <motion.button
             key={role.id}
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.08 * index }}
+            transition={{ duration: 0.32, delay: 0.06 * index }}
             onClick={() => handleSelect(role.id)}
             className="card p-4 flex items-center gap-4 text-left
                        hover:border-accent/40 active:scale-[0.98]
                        transition-all duration-200 group"
           >
             <div className="w-12 h-12 rounded-xl bg-bg-elevated flex items-center justify-center text-2xl
-                            group-hover:bg-accent/15 transition-colors">
+                            group-hover:bg-accent/15 transition-colors shrink-0">
               {role.icon}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="font-medium text-[16px]">{role.title}</div>
-              <div className="text-sm text-text-secondary mt-0.5 truncate">
+              <div className="font-medium text-[15.5px]">{role.title}</div>
+              <div className="text-sm text-text-secondary mt-0.5">
                 {role.description}
               </div>
             </div>
-            <div className="text-text-muted group-hover:text-accent transition-colors">
+            <div className="text-text-muted group-hover:text-accent transition-colors text-lg">
               →
             </div>
           </motion.button>
         ))}
       </div>
 
-      <p className="text-center text-xs text-text-muted mt-6">
+      <p className="text-center text-xs text-text-muted mt-7">
         Выбор можно изменить позже в профиле
       </p>
     </div>
