@@ -10,6 +10,7 @@ import Article from './pages/Article'
 import Navigator from './pages/Navigator'
 import CasePage from './pages/Case'
 import Draft from './pages/Draft'
+import Contacts from './pages/Contacts'
 import { useUserStore } from './store/userStore'
 
 function App() {
@@ -41,6 +42,7 @@ function App() {
         <Route path="/navigator" element={<Navigator />} />
         <Route path="/case" element={<CasePage />} />
         <Route path="/draft" element={<Draft />} />
+        <Route path="/contacts" element={<Contacts />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
