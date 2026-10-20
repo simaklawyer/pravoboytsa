@@ -3,11 +3,13 @@
 Премиальный навигатор по правам военнослужащих и их семей.  
 Telegram Mini App.
 
+Репозиторий: [simaklawyer/pravoboytsa](https://github.com/simaklawyer/pravoboytsa) (может быть **private** — открывайте под аккаунтом `simaklawyer`).
+
 ## Стек
 
 - React 18 + TypeScript + Vite
 - Tailwind CSS · Framer Motion · Zustand · React Router
-- Бот: aiogram 3 (`/bot`)
+- Бот: aiogram 3 (`/bot`) — **не** на Vercel (long polling)
 
 ## Локально
 
@@ -16,49 +18,45 @@ npm install
 npm run dev
 ```
 
-## Деплой Mini App (HTTPS)
+## Деплой Mini App на Vercel
 
-Нужен **HTTPS**-URL. Рекомендация: **Vercel** (1–2 минуты).
+В корне лежит `vercel.json` в режиме **Services**:
 
-### 1. Vercel (предпочтительно)
+| Сервис | Имя | Публичный | Путь |
+|--------|-----|-----------|------|
+| Mini App (Vite) | `app` | да | `/*` |
+| Бот | — | нет | отдельно (VPS / свой хост) |
 
-1. Зайдите на [vercel.com](https://vercel.com) → **Add New Project**
-2. Import GitHub-репозиторий **`simaklawyer/pravoboytsa`**
-3. Framework Preset: **Vite** (определится сам)
-4. Build Command: `npm run build` · Output: `dist`
-5. Deploy → получите URL вида `https://pravoboytsa-xxx.vercel.app`
+Биндингов между сервисами нет: фронт не вызывает бота по HTTP.
 
-В репозитории уже есть `vercel.json` (SPA-роутинг + заголовки под Telegram iframe).
+### Шаги
 
-### 2. Cloudflare Pages
+1. [vercel.com/new](https://vercel.com/new) → Import **`simaklawyer/pravoboytsa`**  
+   (если репо private — дайте Vercel доступ к private repos)
+2. Deploy (framework/root подхватит service `app`)
+3. Скопируйте URL: `https://….vercel.app`
 
-1. [pages.cloudflare.com](https://pages.cloudflare.com) → Create → connect GitHub
-2. Build command: `npm run build` · Output directory: `dist`
-3. Deploy
+### BotFather + бот
 
-### 3. После деплоя — BotFather
-
-1. `@BotFather` → ваш бот → **Bot Settings** → **Menu Button** → **Configure menu button**  
-   или **Web App** / **Direct Link**
-2. URL: `https://ваш-домен` (без слэша в конце или со — оба обычно работают)
-3. В окружении бота:
+1. `@BotFather` → Menu Button / Web App → URL = ваш Vercel-домен  
+2. Локально или на VPS:
 
 ```bash
 export BOT_TOKEN=...
-export WEBAPP_URL=https://ваш-домен
+export WEBAPP_URL=https://ваш-домен.vercel.app
 cd bot && pip install -r requirements.txt && python main.py
 ```
 
-Кнопка «Открыть ПравоБойца» в `/start` откроет Mini App.
+Позже можно добавить webhook-сервис `bot` на Vercel (`/api/telegram`) — сейчас polling на serverless не подходит.
 
-## Бот
+## Cloudflare Pages (альтернатива)
 
-См. папку `bot/` — минимальный aiogram 3 с WebApp-кнопкой.
+Build: `npm run build` · Output: `dist`
 
 ## Цвета
 
-- Фон `#0B0F0C` · карточки `#141A16` · акцент `#3D8B6E`
+Фон `#0B0F0C` · карточки `#141A16` · акцент `#3D8B6E`
 
 ## Важно
 
-Материалы справочные, не юридическая консультация. Не копируйте чужой контент один в один.
+Материалы справочные, не юридическая консультация.
