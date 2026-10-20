@@ -1,6 +1,10 @@
+import { useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { articles, sections } from '../data/sections'
+import { articleChecklists } from '../data/checklists'
 import { useFavoritesStore } from '../store/favoritesStore'
+import { useRecentStore } from '../store/recentStore'
+import { useChecklistStore } from '../store/checklistStore'
 import BottomNav from '../components/BottomNav'
 
 const articleBodies: Record<string, string> = {
@@ -243,6 +247,23 @@ const articleBodies: Record<string, string> = {
 Перечень льгот может меняться — проверяйте актуальные нормы.`,
 }
 
+function shareArticle(title: string, path: string) {
+  const tg = (window as any).Telegram?.WebApp
+  const url = window.location.href
+  const text = `${title}\n${url}`
+  if (tg?.openTelegramLink) {
+    // share via Telegram share URL if available
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`
+    tg.openTelegramLink(shareUrl)
+    return
+  }
+  if (navigator.share) {
+    void navigator.share({ title, text, url }).catch(() => {})
+    return
+  }
+  void navigator.clipboard.writeText(text).catch(() => {})
+}
+
 export default function Article() {
   const { id } = useParams<{ id: string }>()
   const article = articles.find((a) => a.id === id)
@@ -250,9 +271,20 @@ export default function Article() {
     ? sections.find((s) => s.id === article.sectionId)
     : null
   const body = id ? articleBodies[id] : null
+  const checks = id ? articleChecklists[id] ?? [] : []
 
   const { has, toggle } = useFavoritesStore()
+  const touch = useRecentStore((s) => s.touch)
+  const toggleCheck = useChecklistStore((s) => s.toggle)
+  const byArticle = useChecklistStore((s) => s.byArticle)
+  const done = id ? byArticle[id] ?? [] : []
   const isFavorite = id ? has(id) : false
+  const progress =
+    checks.length > 0 ? Math.round((done.length / checks.length) * 100) : 0
+
+  useEffect(() => {
+    if (id) touch(id)
+  }, [id, touch])
 
   if (!article) {
     return (
@@ -279,17 +311,29 @@ export default function Article() {
             ← {section?.title || 'Разделы'}
           </Link>
 
-          <button
-            onClick={() => id && toggle(id)}
-            className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg
-                        border transition-all duration-200
-                        ${isFavorite
-                          ? 'bg-accent/15 border-accent/40 text-accent'
-                          : 'bg-bg-elevated border-border text-text-muted'}`}
-            aria-label={isFavorite ? 'Убрать из избранного' : 'В избранное'}
-          >
-            {isFavorite ? '★' : '☆'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => shareArticle(article.title, `/article/${article.id}`)}
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-sm
+                         border border-border bg-bg-elevated text-text-muted"
+              aria-label="Поделиться"
+            >
+              ↗
+            </button>
+            <button
+              type="button"
+              onClick={() => id && toggle(id)}
+              className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg
+                          border transition-all duration-200
+                          ${isFavorite
+                            ? 'bg-accent/15 border-accent/40 text-accent'
+                            : 'bg-bg-elevated border-border text-text-muted'}`}
+              aria-label={isFavorite ? 'Убрать из избранного' : 'В избранное'}
+            >
+              {isFavorite ? '★' : '☆'}
+            </button>
+          </div>
         </div>
 
         <h1 className="text-xl font-semibold leading-snug tracking-tight">
@@ -334,6 +378,41 @@ export default function Article() {
             </p>
           )}
         </div>
+
+        {checks.length > 0 && id ? (
+          <div className="card p-4 mt-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-medium">Чек-лист</span>
+              <span className="text-text-muted">{progress}%</span>
+            </div>
+            <div className="mt-2 h-1.5 rounded-full bg-bg-elevated overflow-hidden">
+              <div
+                className="h-full bg-accent transition-all"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <ul className="mt-3 space-y-2">
+              {checks.map((item) => {
+                const on = done.includes(item)
+                return (
+                  <li key={item}>
+                    <label className="flex items-start gap-3 text-sm leading-snug">
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() => toggleCheck(id, item)}
+                        className="mt-0.5 accent-[#3D8B6E]"
+                      />
+                      <span className={on ? 'text-text-muted line-through' : ''}>
+                        {item}
+                      </span>
+                    </label>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ) : null}
 
         <div className="mt-4 rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm text-accent-light leading-relaxed">
           Материал носит справочный характер и не является юридической консультацией.
