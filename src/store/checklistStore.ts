@@ -1,11 +1,12 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+const EMPTY: string[] = []
+
 interface ChecklistState {
-  /** articleId -> checked item keys */
   byArticle: Record<string, string[]>
   toggle: (articleId: string, item: string) => void
-  isChecked: (articleId: string, item: string) => boolean
+  items: (articleId: string) => string[]
 }
 
 export const useChecklistStore = create<ChecklistState>()(
@@ -19,8 +20,7 @@ export const useChecklistStore = create<ChecklistState>()(
           : [...cur, item]
         set({ byArticle: { ...get().byArticle, [articleId]: next } })
       },
-      isChecked: (articleId, item) =>
-        (get().byArticle[articleId] ?? []).includes(item),
+      items: (articleId) => get().byArticle[articleId] ?? EMPTY,
     }),
     { name: 'pravoboytsa-checklists' }
   )
