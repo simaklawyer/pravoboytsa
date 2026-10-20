@@ -2,7 +2,8 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { useUserStore } from '../store/userStore'
 import { useCaseStore } from '../store/caseStore'
-import { sections } from '../data/sections'
+import { useRecentStore } from '../store/recentStore'
+import { articles, sections } from '../data/sections'
 import BottomNav from '../components/BottomNav'
 
 const roleLabels: Record<string, string> = {
@@ -23,6 +24,11 @@ const quickActions = [
 export default function Home() {
   const role = useUserStore((s) => s.role)
   const caseCount = useCaseStore((s) => s.cases.length)
+  const recentIds = useRecentStore((s) => s.ids)
+  const recent = recentIds
+    .map((id) => articles.find((a) => a.id === id))
+    .filter(Boolean)
+    .slice(0, 3)
 
   return (
     <div className="min-h-full pb-24 safe-top">
@@ -59,23 +65,48 @@ export default function Home() {
         <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
           Инструменты
         </h2>
-        <div className="grid grid-cols-3 gap-2.5">
-          <Link to="/navigator" className="card p-3 text-center hover:border-accent/30 transition-all">
-            <div className="text-xl mb-1">🧭</div>
-            <div className="text-xs font-medium leading-snug">Где я в деле</div>
+        <div className="grid grid-cols-4 gap-2">
+          <Link to="/navigator" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+            <div className="text-lg mb-1">🧭</div>
+            <div className="text-[10px] font-medium leading-snug">Ступени</div>
           </Link>
-          <Link to="/case" className="card p-3 text-center hover:border-accent/30 transition-all">
-            <div className="text-xl mb-1">📋</div>
-            <div className="text-xs font-medium leading-snug">
-              {caseCount === 0 ? 'Моё дело' : `Дел: ${caseCount}`}
+          <Link to="/case" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+            <div className="text-lg mb-1">📋</div>
+            <div className="text-[10px] font-medium leading-snug">
+              {caseCount === 0 ? 'Дело' : `${caseCount}`}
             </div>
           </Link>
-          <Link to="/draft" className="card p-3 text-center hover:border-accent/30 transition-all">
-            <div className="text-xl mb-1">✍️</div>
-            <div className="text-xs font-medium leading-snug">Рапорт</div>
+          <Link to="/draft" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+            <div className="text-lg mb-1">✍️</div>
+            <div className="text-[10px] font-medium leading-snug">Рапорт</div>
+          </Link>
+          <Link to="/contacts" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+            <div className="text-lg mb-1">📞</div>
+            <div className="text-[10px] font-medium leading-snug">Связь</div>
           </Link>
         </div>
       </div>
+
+      {recent.length > 0 ? (
+        <div className="px-5 mb-6">
+          <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
+            Недавно читали
+          </h2>
+          <div className="flex flex-col gap-2">
+            {recent.map((article) =>
+              article ? (
+                <Link
+                  key={article.id}
+                  to={`/article/${article.id}`}
+                  className="text-sm text-text-primary hover:text-accent transition-colors"
+                >
+                  {article.title}
+                </Link>
+              ) : null
+            )}
+          </div>
+        </div>
+      ) : null}
 
       <div className="px-5 mb-8">
         <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
