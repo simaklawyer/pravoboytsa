@@ -1,5 +1,7 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useUserStore, Role } from '../store/userStore'
+import { useFavoritesStore } from '../store/favoritesStore'
+import { articles } from '../data/sections'
 import BottomNav from '../components/BottomNav'
 
 const roleLabels: Record<string, { title: string; icon: string }> = {
@@ -14,9 +16,11 @@ const roles: Role[] = ['contract', 'svo', 'relative', 'veteran', 'conscript']
 
 export default function Profile() {
   const { role, setRole, reset } = useUserStore()
+  const { ids, clear } = useFavoritesStore()
   const navigate = useNavigate()
 
   const current = role ? roleLabels[role] : null
+  const favoriteArticles = articles.filter((a) => ids.includes(a.id))
 
   return (
     <div className="min-h-full pb-24 safe-top">
@@ -37,6 +41,49 @@ export default function Profile() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Favorites */}
+      <div className="px-5 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">
+            Избранное
+          </h2>
+          {favoriteArticles.length > 0 && (
+            <button
+              onClick={clear}
+              className="text-xs text-text-muted hover:text-text-secondary"
+            >
+              Очистить
+            </button>
+          )}
+        </div>
+
+        {favoriteArticles.length === 0 ? (
+          <div className="card p-5 text-center">
+            <div className="text-2xl mb-2">☆</div>
+            <p className="text-sm text-text-secondary">
+              Пока пусто. Отмечайте статьи звёздочкой — они появятся здесь.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {favoriteArticles.map((article) => (
+              <Link
+                key={article.id}
+                to={`/article/${article.id}`}
+                className="card p-3.5 block hover:border-accent/30 transition-all"
+              >
+                <div className="font-medium text-[14px] leading-snug">
+                  {article.title}
+                </div>
+                <div className="text-xs text-text-muted mt-1 line-clamp-1">
+                  {article.summary}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Change role */}
@@ -69,7 +116,7 @@ export default function Profile() {
         <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
           Действия
         </h2>
-        <div className="card divide-y divide-border">
+        <div className="card divide-y divide-border overflow-hidden">
           <button
             onClick={() => {
               reset()
@@ -89,7 +136,7 @@ export default function Profile() {
           Мы видим только анонимную статистику открытых статей.
         </div>
         <p className="text-center text-xs text-text-muted mt-4">
-          База знаний · справочный характер
+          База знаний · справочный характер · {articles.length} материалов
         </p>
       </div>
 
