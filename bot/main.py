@@ -2,20 +2,11 @@
 ПравоБойца — Telegram-бот (aiogram 3.x).
 
 Локально: long polling.
-Render Free (Web Service): webhook на PORT — без платного Worker.
+Render Free (Web Service): webhook на PORT.
 
 Переменные:
-  BOT_TOKEN       — токен BotFather
-  WEBAPP_URL      — https://pravoboytsa.vercel.app
-  LAWYER_URL      — опционально, ссылка «Спросить юриста»
-  WEBHOOK_BASE    — https://ваш-сервис.onrender.com  (на Render можно не задавать,
-                    подставится RENDER_EXTERNAL_URL)
-  PORT            — задаёт Render сам
-
-Локально:
-  export BOT_TOKEN=...
-  export WEBAPP_URL=https://pravoboytsa.vercel.app
-  python main.py
+  BOT_TOKEN, WEBAPP_URL, LAWYER_URL (опц.)
+  WEBHOOK_BASE=https://pravoboytsa-bot.onrender.com
 """
 
 from __future__ import annotations
@@ -37,7 +28,10 @@ from aiogram.types import (
 )
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(name)s: %(message)s",
+)
 log = logging.getLogger("pravoboytsa-bot")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
@@ -141,6 +135,7 @@ def build_dispatcher() -> Dispatcher:
     dp = Dispatcher()
 
     async def cmd_start(message: Message) -> None:
+        log.info("/start from id=%s", message.from_user.id if message.from_user else "?")
         user = message.from_user
         name = user.first_name if user else None
         text = start_text(name)
@@ -161,6 +156,7 @@ def build_dispatcher() -> Dispatcher:
         body = (message.text or "").strip()
         if not body:
             return
+        log.info("text hint query len=%s", len(body))
         hint = match_hint(body)
         if hint:
             await message.answer(
@@ -192,26 +188,36 @@ def webhook_base() -> str:
 async def run_polling(bot: Bot, dp: Dispatcher) -> None:
     log.info("Mode: long polling")
     await bot.delete_webhook(drop_pending_updates=True)
-    await dp.start_polling(bot)
+    try:
+        await dp.start_polling(bot)
+    finally:
+        await bot.session.close()
 
 
 def run_webhook(bot: Bot, dp: Dispatcher) -> None:
     base = webhook_base()
     if not base:
         raise SystemExit(
-            "Для webhook задайте WEBHOOK_BASE=https://ваш-сервис.onrender.com "
-            "или дождитесь RENDER_EXTERNAL_URL на Render."
+            "Задайте WEBHOOK_BASE=https://pravoboytsa-bot.onrender.com"
         )
     port = int(os.environ.get("PORT", "10000"))
     webhook_url = f"{base}{WEBHOOK_PATH}"
 
     async def on_startup(app: web.Application) -> None:
-        await bot.set_webhook(webhook_url, drop_pending_updates=True)
-        log.info("Webhook set: %s", webhook_url)
+        # Не удаляем webhook при рестартах Render — иначе Telegram теряет доставку.
+        await bot.set_webhook(
+            url=webhook_url,
+            drop_pending_updates=False,
+            allowed_updates=["message", "callback_query"],
+        )
+        info = await bot.get_webhook_info()
+        log.info("Webhook set: %s (pending=%s)", info.url, info.pending_update_count)
 
     async def on_shutdown(app: web.Application) -> None:
-        await bot.delete_webhook()
-        log.info("Webhook removed")
+        # Важно: НЕ вызываем delete_webhook — при Timed Out/рестарте Render
+        # webhook должен остаться, иначе бот «молчит» до следующего удачного старта.
+        log.info("Shutdown: closing bot session (webhook kept)")
+        await bot.session.close()
 
     async def health(_request: web.Request) -> web.Response:
         return web.Response(text="ok")
@@ -219,13 +225,16 @@ def run_webhook(bot: Bot, dp: Dispatcher) -> None:
     app = web.Application()
     app.router.add_get("/", health)
     app.router.add_get("/health", health)
-    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
+    SimpleRequestHandler(
+        dispatcher=dp,
+        bot=bot,
+    ).register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
 
-    log.info("Mode: webhook on 0.0.0.0:%s path=%s", port, WEBHOOK_PATH)
-    web.run_app(app, host="0.0.0.0", port=port)
+    log.info("Starting webhook server 0.0.0.0:%s url=%s", port, webhook_url)
+    web.run_app(app, host="0.0.0.0", port=port, print=lambda *a, **k: None)
 
 
 def main() -> None:
@@ -234,23 +243,10 @@ def main() -> None:
     bot = Bot(BOT_TOKEN)
     dp = build_dispatcher()
 
-    # Render / любой PaaS с PORT → webhook (бесплатный Web Service).
-    # Локально без PORT → polling.
-    use_webhook = bool(os.environ.get("PORT")) or bool(webhook_base())
-    if use_webhook and (os.environ.get("PORT") or webhook_base()):
-        # На Render всегда есть PORT; если WEBHOOK_BASE ещё пуст при старте —
-        # RENDER_EXTERNAL_URL обычно уже есть.
-        if not webhook_base() and not os.environ.get("PORT"):
-            asyncio.run(run_polling(bot, dp))
-            return
+    if os.environ.get("PORT") or webhook_base():
         if not webhook_base():
-            log.warning(
-                "PORT задан, но нет WEBHOOK_BASE/RENDER_EXTERNAL_URL — "
-                "задайте WEBHOOK_BASE вручную после первого деплоя."
-            )
             raise SystemExit(
-                "Задайте WEBHOOK_BASE=https://<имя>.onrender.com "
-                "(URL сервиса из Dashboard Render)."
+                "Задайте WEBHOOK_BASE=https://pravoboytsa-bot.onrender.com"
             )
         run_webhook(bot, dp)
     else:
