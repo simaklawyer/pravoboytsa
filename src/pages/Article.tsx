@@ -1,12 +1,18 @@
 import { useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { articles, sections } from '../data/sections'
-import { articleBodies } from '../data/articleBodies'
+import { articleBodies as articleBodiesBase } from '../data/articleBodies'
+import { articleBodiesExtra } from '../data/articleBodiesExtra'
 import { articleChecklists } from '../data/checklists'
 import { useFavoritesStore } from '../store/favoritesStore'
 import { useRecentStore } from '../store/recentStore'
 import { useChecklistStore } from '../store/checklistStore'
 import BottomNav from '../components/BottomNav'
+
+const articleBodies: Record<string, string> = {
+  ...articleBodiesBase,
+  ...articleBodiesExtra,
+}
 
 const EMPTY_CHECKS: string[] = []
 
