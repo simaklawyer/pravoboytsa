@@ -133,6 +133,7 @@ export default function Profile() {
 
       <div className="px-5 mb-6">
         <CompanyCard title="О нас и связь с юристом" />
+        <Link to="/about" className="text-sm text-accent inline-block mt-3">Контакты и политика обработки данных →</Link>
       </div>
 
       {/* Info */}

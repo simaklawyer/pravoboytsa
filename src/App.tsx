@@ -12,6 +12,7 @@ import CasePage from './pages/Case'
 import Draft from './pages/Draft'
 import Contacts from './pages/Contacts'
 import Calc from './pages/Calc'
+import About from './pages/About'
 import { useUserStore } from './store/userStore'
 
 function App() {
@@ -45,6 +46,7 @@ function App() {
         <Route path="/draft" element={<Draft />} />
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/calc" element={<Calc />} />
+        <Route path="/about" element={<About />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>

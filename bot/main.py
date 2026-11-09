@@ -154,6 +154,7 @@ def main_keyboard() -> InlineKeyboardMarkup:
         ]
     )
     rows.append([InlineKeyboardButton(text=COMPANY_SITE_LABEL, url=COMPANY_SITE)])
+    rows.append([InlineKeyboardButton(text="Политика обработки данных", url=f"{WEBAPP_URL}/about" if WEBAPP_URL else COMPANY_SITE)])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
@@ -178,6 +179,7 @@ def start_text(first_name: str | None) -> str:
         "Например: «не приходит довольствие», «как пройти ВВК», «муж не на связи».\n\n"
         "Если ситуация сложная, нажмите «Оставить заявку»: четыре вопроса, и юрист свяжется с вами.\n\n"
         f"Телефон: {COMPANY_PHONE}\n\n"
+        "Политика обработки данных: " + (f"{WEBAPP_URL}/about" if WEBAPP_URL else COMPANY_SITE) + "\n\n"
         "Материалы справочные и не заменяют очную консультацию."
     )
 
