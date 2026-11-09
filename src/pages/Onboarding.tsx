@@ -6,31 +6,31 @@ const roles: { id: Role; title: string; description: string; icon: string }[] = 
   {
     id: 'contract',
     title: 'Контрактник',
-    description: 'Права, довольствие, отпуска, ВВК',
+    description: 'Контракт, довольствие, ВВК, увольнение',
     icon: '🪖',
   },
   {
     id: 'svo',
     title: 'Участник СВО / мобилизованный',
-    description: 'Выплаты, ранения, защита, льготы',
+    description: 'Выплаты, ранения, ВВК, защита прав',
     icon: '⭐',
   },
   {
     id: 'relative',
     title: 'Жена, мать, близкий',
-    description: 'Поиск, пособия, жильё, дети',
+    description: 'Поиск, выплаты семье, дети, жильё',
     icon: '❤️',
   },
   {
     id: 'veteran',
     title: 'Ветеран / уволенный',
-    description: 'Статус, пенсия, льготы, работа',
+    description: 'Статус ветерана, пенсии, льготы',
     icon: '🎗️',
   },
   {
     id: 'conscript',
     title: 'Срочник или родители',
-    description: 'Права, перевод, дедовщина, дембель',
+    description: 'Рапорты, жалобы, ВВК, защита прав',
     icon: '🪂',
   },
 ]
@@ -59,7 +59,7 @@ export default function Onboarding() {
           </div>
           <div>
             <h1 className="text-xl font-semibold tracking-tight">ПравоБойца</h1>
-            <p className="text-sm text-text-secondary">Навигатор прав военнослужащих</p>
+            <p className="text-sm text-text-secondary">Права военнослужащих и их семей</p>
           </div>
         </div>
 
@@ -67,7 +67,7 @@ export default function Onboarding() {
           Кто вы?
         </h2>
         <p className="text-text-secondary mt-2 text-[15px] leading-relaxed max-w-[320px]">
-          Выберите один раз — приложение поднимет вверх то, что нужно именно вам.
+          Выберите один раз. На главной появится подборка материалов именно для вас.
         </p>
       </motion.div>
 
@@ -101,7 +101,7 @@ export default function Onboarding() {
       </div>
 
       <p className="text-center text-xs text-text-muted mt-7">
-        Выбор можно изменить позже в профиле
+        Роль можно сменить в любой момент в профиле
       </p>
     </div>
   )

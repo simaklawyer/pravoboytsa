@@ -1,22 +1,130 @@
 import { useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { articles, sections } from '../data/sections'
-import { articleBodies as articleBodiesBase } from '../data/articleBodies'
-import { articleBodiesExtra } from '../data/articleBodiesExtra'
-import { articleBodiesNov } from '../data/articleBodiesNov'
+import { articleBodies } from '../data/articleBodies'
 import { articleChecklists } from '../data/checklists'
 import { useFavoritesStore } from '../store/favoritesStore'
 import { useRecentStore } from '../store/recentStore'
 import { useChecklistStore } from '../store/checklistStore'
 import BottomNav from '../components/BottomNav'
-
-const articleBodies: Record<string, string> = {
-  ...articleBodiesBase,
-  ...articleBodiesExtra,
-  ...articleBodiesNov,
-}
+import { CompanyCta } from '../components/CompanyCard'
 
 const EMPTY_CHECKS: string[] = []
+
+type Block =
+  | { type: 'h'; text: string }
+  | { type: 'p'; text: string }
+  | { type: 'ul'; items: string[] }
+  | { type: 'ol'; items: { n: string; text: string }[] }
+
+/** Разбирает разметку статьи: **подзаголовок**, «- » списки, «1. » нумерованные списки. */
+function parseBody(body: string): Block[] {
+  const blocks: Block[] = []
+  for (const raw of body.split('\n')) {
+    const line = raw.trim()
+    if (!line) continue
+
+    const heading = line.match(/^\*\*(.+)\*\*$/)
+    if (heading && !heading[1].includes('**')) {
+      blocks.push({ type: 'h', text: heading[1] })
+      continue
+    }
+    const bullet = line.match(/^[-•]\s+(.*)$/)
+    if (bullet) {
+      const last = blocks[blocks.length - 1]
+      if (last?.type === 'ul') last.items.push(bullet[1])
+      else blocks.push({ type: 'ul', items: [bullet[1]] })
+      continue
+    }
+    const numbered = line.match(/^(\d+)\.\s+(.*)$/)
+    if (numbered) {
+      const item = { n: numbered[1], text: numbered[2] }
+      const last = blocks[blocks.length - 1]
+      if (last?.type === 'ol') last.items.push(item)
+      else blocks.push({ type: 'ol', items: [item] })
+      continue
+    }
+    blocks.push({ type: 'p', text: line })
+  }
+  return blocks
+}
+
+/** Выделение внутри строки: **жирный** и *курсив*. */
+function Inline({ text }: { text: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*\s][^*]*\*)/g)
+  return (
+    <>
+      {parts.map((part, i) => {
+        if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+          return <strong key={i}>{part.slice(2, -2)}</strong>
+        }
+        if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+          return <em key={i}>{part.slice(1, -1)}</em>
+        }
+        return <span key={i}>{part}</span>
+      })}
+    </>
+  )
+}
+
+function ArticleBody({ body }: { body: string }) {
+  const blocks = parseBody(body)
+  return (
+    <div className="article-body">
+      {blocks.map((block, i) => {
+        switch (block.type) {
+          case 'h':
+            return (
+              <h2
+                key={i}
+                className="text-[16px] font-semibold text-white leading-snug mt-6 mb-2 first:mt-0"
+              >
+                {block.text}
+              </h2>
+            )
+          case 'ul':
+            return (
+              <ul key={i} className="mb-3 space-y-1.5">
+                {block.items.map((item, j) => (
+                  <li key={j} className="flex gap-3">
+                    <span
+                      aria-hidden
+                      className="mt-[0.72em] h-1.5 w-1.5 shrink-0 rounded-full bg-accent/70"
+                    />
+                    <span className="flex-1">
+                      <Inline text={item} />
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )
+          case 'ol':
+            return (
+              <ol key={i} className="mb-3 space-y-2">
+                {block.items.map((item, j) => (
+                  <li key={j} className="flex gap-3">
+                    <span className="w-5 shrink-0 text-right font-medium text-accent">
+                      {item.n}.
+                    </span>
+                    <span className="flex-1">
+                      <Inline text={item.text} />
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            )
+          default:
+            return (
+              <p key={i} className="mb-3">
+                <Inline text={block.text} />
+              </p>
+            )
+        }
+      })}
+    </div>
+  )
+}
+
 
 function shareArticle(title: string) {
   const tg = (window as any).Telegram?.WebApp
@@ -61,9 +169,9 @@ export default function Article() {
       <div className="min-h-full flex items-center justify-center px-5">
         <div className="text-center">
           <div className="text-4xl mb-3">📄</div>
-          <p className="text-text-secondary">Статья не найдена</p>
+          <p className="text-text-secondary">Такой статьи нет или она переехала</p>
           <Link to="/sections" className="text-accent mt-4 inline-block">
-            ← К разделам
+            ← Ко всем разделам
           </Link>
         </div>
       </div>
@@ -87,7 +195,7 @@ export default function Article() {
               onClick={() => shareArticle(article.title)}
               className="w-10 h-10 rounded-xl flex items-center justify-center text-sm
                          border border-border bg-bg-elevated text-text-muted"
-              aria-label="Поделиться"
+              aria-label="Поделиться статьёй"
             >
               ↗
             </button>
@@ -125,26 +233,10 @@ export default function Article() {
       <div className="px-5 mt-6">
         <div className="card p-5">
           {body ? (
-            <div className="article-body whitespace-pre-line">
-              {body.split('\n').map((line, i) => {
-                if (line.startsWith('**') && line.endsWith('**')) {
-                  return (
-                    <p key={i} className="font-semibold text-white mt-4 mb-2 first:mt-0">
-                      {line.replace(/\*\*/g, '')}
-                    </p>
-                  )
-                }
-                if (line.trim() === '') return <br key={i} />
-                return (
-                  <p key={i} className="mb-1">
-                    {line}
-                  </p>
-                )
-              })}
-            </div>
+            <ArticleBody body={body} />
           ) : (
             <p className="text-text-secondary text-sm">
-              Полный текст статьи скоро будет добавлен.
+              Полный текст этой статьи ещё готовится.
             </p>
           )}
         </div>
@@ -152,7 +244,7 @@ export default function Article() {
         {checks.length > 0 && id ? (
           <div className="card p-4 mt-4">
             <div className="flex items-center justify-between text-sm">
-              <span className="font-medium">Чек-лист</span>
+              <span className="font-medium">Чек-лист: что сделать</span>
               <span className="text-text-muted">{progress}%</span>
             </div>
             <div className="mt-2 h-1.5 rounded-full bg-bg-elevated overflow-hidden">
@@ -185,9 +277,13 @@ export default function Article() {
         ) : null}
 
         <div className="mt-4 rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm text-accent-light leading-relaxed">
-          Материал носит справочный характер и не является юридической консультацией.
-          В сложных ситуациях рекомендуем обратиться к военному юристу. Актуальные суммы
-          и редакции указов сверяйте по официальным источникам.
+          Материал справочный и не заменяет юридическую консультацию. Суммы и нормы
+          меняются: перед подачей документов сверьтесь с официальным текстом акта.
+          В сложной ситуации обратитесь к военному юристу.
+        </div>
+
+        <div className="mt-4">
+          <CompanyCta />
         </div>
       </div>
 

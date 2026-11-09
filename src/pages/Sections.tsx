@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { sections } from '../data/sections'
+import { materials } from '../lib/plural'
 import BottomNav from '../components/BottomNav'
 
 export default function Sections() {
@@ -9,7 +10,7 @@ export default function Sections() {
       <div className="px-5 pt-6 pb-4">
         <h1 className="text-xl font-semibold">Разделы</h1>
         <p className="text-sm text-text-secondary mt-1">
-          Все материалы по категориям
+          Материалы по темам
         </p>
       </div>
 
@@ -36,7 +37,7 @@ export default function Sections() {
                   {section.description}
                 </div>
                 <div className="text-xs text-text-muted mt-1">
-                  {section.count} материалов
+                  {materials(section.count)}
                 </div>
               </div>
               <div className="text-text-muted">→</div>

@@ -4,7 +4,9 @@ import { useUserStore } from '../store/userStore'
 import { useCaseStore } from '../store/caseStore'
 import { useRecentStore } from '../store/recentStore'
 import { articles, sections } from '../data/sections'
+import { materials } from '../lib/plural'
 import BottomNav from '../components/BottomNav'
+import { CompanyCta } from '../components/CompanyCard'
 
 const roleLabels: Record<string, string> = {
   contract: 'Контрактник',
@@ -14,11 +16,20 @@ const roleLabels: Record<string, string> = {
   conscript: 'Срочная служба',
 }
 
+/** Подборка статей для главной: что чаще всего нужно каждой роли. */
+const recommendedByRole: Record<string, string[]> = {
+  contract: ['service-2', 'service-4', 'health-1'],
+  svo: ['money-8', 'money-4', 'money-5'],
+  relative: ['emergency-1', 'emergency-3', 'money-9'],
+  veteran: ['money-6', 'after-1', 'legal-3'],
+  conscript: ['legal-2', 'health-1', 'legal-1'],
+}
+
 const quickActions = [
   { id: 'money', title: 'Выплаты и компенсации', subtitle: 'Что положено и как получить', icon: '💰' },
-  { id: 'housing', title: 'Жильё и ипотека', subtitle: 'НИС, субсидии, служебное', icon: '🏠' },
-  { id: 'health', title: 'Здоровье и ВВК', subtitle: 'Комиссии, лечение, ранения', icon: '🏥' },
-  { id: 'emergency', title: 'Экстренные ситуации', subtitle: 'Пропал, плен, гибель', icon: '🚨' },
+  { id: 'housing', title: 'Жильё и ипотека', subtitle: 'НИС и военная ипотека', icon: '🏠' },
+  { id: 'health', title: 'Здоровье и ВВК', subtitle: 'ВВК, лечение, ранения', icon: '🏥' },
+  { id: 'emergency', title: 'Экстренные ситуации', subtitle: 'Пропал без вести, гибель', icon: '🚨' },
 ]
 
 export default function Home() {
@@ -29,6 +40,9 @@ export default function Home() {
     .map((id) => articles.find((a) => a.id === id))
     .filter(Boolean)
     .slice(0, 3)
+  const recommended = (role ? recommendedByRole[role] ?? [] : [])
+    .map((id) => articles.find((a) => a.id === id))
+    .filter(Boolean)
 
   return (
     <div className="min-h-full pb-24 safe-top">
@@ -57,7 +71,7 @@ export default function Home() {
       <div className="px-5 mb-5">
         <Link to="/search" className="card flex items-center gap-3 px-4 py-3.5 block">
           <span className="text-text-muted">🔍</span>
-          <span className="text-text-muted text-[15px]">Что вас интересует?</span>
+          <span className="text-text-muted text-[15px]">Что нужно найти?</span>
         </Link>
       </div>
 
@@ -65,7 +79,7 @@ export default function Home() {
         <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
           Инструменты
         </h2>
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-5 gap-1.5">
           <Link to="/navigator" className="card p-2.5 text-center hover:border-accent/30 transition-all">
             <div className="text-lg mb-1">🧭</div>
             <div className="text-[10px] font-medium leading-snug">Ступени</div>
@@ -73,19 +87,47 @@ export default function Home() {
           <Link to="/case" className="card p-2.5 text-center hover:border-accent/30 transition-all">
             <div className="text-lg mb-1">📋</div>
             <div className="text-[10px] font-medium leading-snug">
-              {caseCount === 0 ? 'Дело' : `${caseCount}`}
+              {caseCount === 0 ? 'Моё дело' : `Дела: ${caseCount}`}
             </div>
+          </Link>
+          <Link to="/calc" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+            <div className="text-lg mb-1">🧮</div>
+            <div className="text-[10px] font-medium leading-snug">Расчёты</div>
           </Link>
           <Link to="/draft" className="card p-2.5 text-center hover:border-accent/30 transition-all">
             <div className="text-lg mb-1">✍️</div>
-            <div className="text-[10px] font-medium leading-snug">Рапорт</div>
+            <div className="text-[10px] font-medium leading-snug">Документы</div>
           </Link>
           <Link to="/contacts" className="card p-2.5 text-center hover:border-accent/30 transition-all">
             <div className="text-lg mb-1">📞</div>
-            <div className="text-[10px] font-medium leading-snug">Связь</div>
+            <div className="text-[10px] font-medium leading-snug">Контакты</div>
           </Link>
         </div>
       </div>
+
+      {recommended.length > 0 ? (
+        <div className="px-5 mb-6">
+          <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
+            Для вас
+          </h2>
+          <div className="flex flex-col gap-2">
+            {recommended.map((article) =>
+              article ? (
+                <Link
+                  key={article.id}
+                  to={`/article/${article.id}`}
+                  className="card p-3.5 block hover:border-accent/30 transition-all"
+                >
+                  <div className="font-medium text-[14px] leading-snug">{article.title}</div>
+                  <div className="text-xs text-text-muted mt-1 leading-relaxed">
+                    {article.summary}
+                  </div>
+                </Link>
+              ) : null
+            )}
+          </div>
+        </div>
+      ) : null}
 
       {recent.length > 0 ? (
         <div className="px-5 mb-6">
@@ -110,7 +152,7 @@ export default function Home() {
 
       <div className="px-5 mb-8">
         <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
-          Быстрые действия
+          Частые темы
         </h2>
         <div className="grid grid-cols-2 gap-3">
           {quickActions.map((action, i) => (
@@ -136,10 +178,10 @@ export default function Home() {
       <div className="px-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">
-            Все разделы
+            Разделы
           </h2>
           <Link to="/sections" className="text-sm text-accent">
-            Смотреть все
+            Все разделы
           </Link>
         </div>
         <div className="flex flex-col gap-2.5">
@@ -160,7 +202,7 @@ export default function Home() {
                 </div>
                 <div className="flex-1">
                   <div className="font-medium text-[15px]">{section.title}</div>
-                  <div className="text-xs text-text-muted mt-0.5">{section.count} материалов</div>
+                  <div className="text-xs text-text-muted mt-0.5">{materials(section.count)}</div>
                 </div>
                 <div className="text-text-muted">→</div>
               </Link>
@@ -169,9 +211,13 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="px-5 mt-8 mb-4">
+      <div className="px-5 mt-8">
+        <CompanyCta text="Не нашли ответ или ситуация сложная? Разберём её с юристом." />
+      </div>
+
+      <div className="px-5 mt-4 mb-4">
         <div className="rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm text-accent-light">
-          🔒 Мы не собираем персональные данные. Только анонимная статистика просмотров.
+          🔒 Роль, избранное, чек-листы и записи в «Моём деле» хранятся только на вашем устройстве.
         </div>
       </div>
 

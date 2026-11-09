@@ -17,7 +17,8 @@ export default function Navigator() {
       <div className="px-5 pt-6 pb-4">
         <h1 className="text-xl font-semibold">Где вы сейчас</h1>
         <p className="text-sm text-text-secondary mt-1 leading-relaxed">
-          Выберите ступень. Дальше — ближайший шаг, без прыжка через предыдущие.
+          Выберите ступень, на которой вы находитесь. Ниже будет ближайший шаг. Не перескакивайте
+          через предыдущие: так позиция сильнее.
         </p>
       </div>
 
@@ -45,11 +46,11 @@ export default function Navigator() {
       <div className="px-5 mt-5">
         <div className="card p-4">
           <div className="text-xs font-medium text-text-muted uppercase tracking-wider">
-            Признак
+            Как понять, что вы здесь
           </div>
           <p className="text-sm mt-2 leading-relaxed">{current.sign}</p>
           <div className="text-xs font-medium text-text-muted uppercase tracking-wider mt-4">
-            Следующий шаг
+            Что делать дальше
           </div>
           <p className="text-sm mt-2 leading-relaxed">{current.next}</p>
           <div className="mt-4 flex flex-col gap-2">

@@ -1,12 +1,18 @@
 import { useState } from 'react'
 import { stages } from '../data/stages'
 import { useCaseStore } from '../store/caseStore'
+import { plural } from '../lib/plural'
 import BottomNav from '../components/BottomNav'
 
 function daysSince(iso: string) {
   const start = new Date(iso)
   if (Number.isNaN(start.getTime())) return null
   return Math.floor((Date.now() - start.getTime()) / 86_400_000)
+}
+
+function formatDate(iso: string) {
+  const d = new Date(iso)
+  return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString('ru-RU')
 }
 
 export default function CasePage() {
@@ -25,7 +31,7 @@ export default function CasePage() {
       <div className="px-5 pt-6 pb-4">
         <h1 className="text-xl font-semibold">Моё дело</h1>
         <p className="text-sm text-text-secondary mt-1 leading-relaxed">
-          Дата вручения рапорта и текущая ступень. Данные остаются только на устройстве.
+          Записывайте дату вручения рапорта и текущую ступень, чтобы не пропустить сроки. Записи хранятся только на этом устройстве.
         </p>
       </div>
 
@@ -45,7 +51,7 @@ export default function CasePage() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="mt-1 w-full rounded-xl bg-bg-elevated border border-border px-3 py-2.5 outline-none focus:border-accent/40"
-            placeholder="Направление на ВВК"
+            placeholder="Например: направление на ВВК"
           />
         </label>
         <div className="grid grid-cols-2 gap-2">
@@ -64,7 +70,7 @@ export default function CasePage() {
             </select>
           </label>
           <label className="block text-sm">
-            <span className="text-text-muted">Дата старта</span>
+            <span className="text-text-muted">Отсчёт срока с</span>
             <input
               type="date"
               value={started}
@@ -79,17 +85,17 @@ export default function CasePage() {
             value={note}
             onChange={(e) => setNote(e.target.value)}
             className="mt-1 w-full rounded-xl bg-bg-elevated border border-border px-3 py-2.5 outline-none"
-            placeholder="Трек письма, входящий номер"
+            placeholder="Трек-номер письма, входящий номер"
           />
         </label>
         <button type="submit" className="btn-primary w-full">
-          Сохранить
+          Добавить дело
         </button>
       </form>
 
       <div className="px-5 mt-5 flex flex-col gap-3">
         {cases.length === 0 ? (
-          <p className="text-sm text-text-muted text-center py-6">Пока пусто</p>
+          <p className="text-sm text-text-muted text-center py-6 leading-relaxed">Записей пока нет. Добавьте дело выше, и здесь появится ближайший шаг.</p>
         ) : (
           cases.map((item) => {
             const meta = stages.find((s) => s.id === item.stage)
@@ -101,19 +107,26 @@ export default function CasePage() {
                   <button
                     type="button"
                     className="text-xs text-text-muted"
-                    onClick={() => remove(item.id)}
+                    onClick={() => {
+                      if (window.confirm('Удалить эту запись?')) remove(item.id)
+                    }}
                   >
                     Удалить
                   </button>
                 </div>
                 <p className="mt-1 text-sm text-text-secondary">
-                  {meta?.title ?? 'Ступень'} · с {item.started}
-                  {days != null ? ` · ${days} дн.` : ''}
+                  {meta?.title ?? 'Ступень'} · с {formatDate(item.started)}
+                  {days != null ? ` · ${days} ${plural(days, 'день', 'дня', 'дней')}` : ''}
                 </p>
                 {item.note ? <p className="mt-2 text-sm">{item.note}</p> : null}
+                {meta ? (
+                  <p className="mt-2 text-sm text-text-secondary leading-relaxed">
+                    Что делать дальше: {meta.next}
+                  </p>
+                ) : null}
                 {item.stage === 1 && days != null && days >= 30 ? (
                   <p className="mt-2 text-sm text-accent">
-                    30 суток с даты старта прошли — посмотрите ступень жалобы.
+                    Прошло 30 суток. Если ответа нет или он формальный, переходите к ступени 2: жалоба.
                   </p>
                 ) : null}
                 <label className="mt-3 block text-xs text-text-muted">

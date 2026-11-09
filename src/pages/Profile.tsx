@@ -2,7 +2,9 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useUserStore, Role } from '../store/userStore'
 import { useFavoritesStore } from '../store/favoritesStore'
 import { articles } from '../data/sections'
+import { materials } from '../lib/plural'
 import BottomNav from '../components/BottomNav'
+import { CompanyCard } from '../components/CompanyCard'
 
 const roleLabels: Record<string, { title: string; icon: string }> = {
   contract: { title: 'Контрактник', icon: '🪖' },
@@ -63,7 +65,7 @@ export default function Profile() {
           <div className="card p-5 text-center">
             <div className="text-2xl mb-2">☆</div>
             <p className="text-sm text-text-secondary">
-              Пока пусто. Отмечайте статьи звёздочкой — они появятся здесь.
+              Пока пусто. Отмечайте нужные статьи звёздочкой, и они появятся здесь.
             </p>
           </div>
         ) : (
@@ -124,19 +126,23 @@ export default function Profile() {
             }}
             className="w-full px-4 py-3.5 text-left text-[15px] text-red-400 hover:bg-bg-elevated transition-colors"
           >
-            Сбросить и выбрать роль заново
+            Сбросить роль и выбрать заново
           </button>
         </div>
+      </div>
+
+      <div className="px-5 mb-6">
+        <CompanyCard title="О нас и связь с юристом" />
       </div>
 
       {/* Info */}
       <div className="px-5">
         <div className="rounded-xl bg-bg-elevated border border-border px-4 py-3 text-sm text-text-secondary leading-relaxed">
-          🔒 ПравоБойца не собирает имя, телефон или Telegram-аккаунт.
-          Мы видим только анонимную статистику открытых статей.
+          🔒 Роль, избранное, чек-листы и «Моё дело» хранятся только на вашем устройстве.
+          ПравоБойца не запрашивает ваше имя, телефон и данные Telegram-аккаунта.
         </div>
         <p className="text-center text-xs text-text-muted mt-4">
-          База знаний · справочный характер · {articles.length} материалов
+          {materials(articles.length)} · справочный характер
         </p>
       </div>
 
