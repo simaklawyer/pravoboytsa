@@ -11,3 +11,4 @@ export const company = {
   email: '1000@pboitsa.ru',
   emailHref: 'mailto:1000@pboitsa.ru',
 } as const
+// build verified 2026-11-09
