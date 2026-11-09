@@ -282,6 +282,8 @@ export default function Article() {
           В сложной ситуации обратитесь к военному юристу.
         </div>
 
+        <p className="mt-4 text-xs text-text-muted">Проверено: {article.updated}</p>
+
         <div className="mt-4">
           <CompanyCta />
         </div>

@@ -12,6 +12,7 @@ export interface ArticleMeta {
   title: string
   summary: string
   tags: string[]
+  updated: string
 }
 
 export const sections: Section[] = [
@@ -76,6 +77,7 @@ export const sections: Section[] = [
 export const articles: ArticleMeta[] = [
   {
     id: 'money-1',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Денежное довольствие: из чего оно складывается',
     summary: 'Оклады, надбавки, районные коэффициенты и как проверить расчёт',
@@ -83,6 +85,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'money-2',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Выплаты при ранении: порядок действий',
     summary: 'Какие документы собрать и куда подавать рапорт',
@@ -90,6 +93,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'money-3',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Выплаты при увольнении с военной службы',
     summary: 'Что должны выплатить и что проверить в расчёте',
@@ -97,6 +101,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'money-4',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Выплаты при ранении на СВО: суммы и логика',
     summary: 'Единовременные, страховые, при инвалидности и увольнении; как складываются суммы',
@@ -104,6 +109,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'money-5',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Справки 100 и 98 и степень тяжести увечья',
     summary: 'Какие документы нужны для выплат и что делать, если их нет',
@@ -111,6 +117,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'money-6',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Инвалидность после военной травмы: пенсии СФР и Минобороны',
     summary: 'Государственная пенсия, ЕДВ и компенсации в 2026 году; памятка для III группы',
@@ -118,6 +125,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'money-7',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Долги по налогам: как участнику СВО приостановить взыскание',
     summary: 'Заявление в каждый банк, ст. 7 ФЗ-603 и что делать, если счёт не разблокировали',
@@ -125,6 +133,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'money-8',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Выплата по Указу № 98: когда положена, позиция Верховного Суда',
     summary: 'Нужен ли бой, как считать суммы после 13.11.2024, что делать при отказе или требовании вернуть деньги',
@@ -132,6 +141,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'money-9',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Порядок назначения выплат по Указу № 98: кто решает и какие документы',
     summary: 'Приказ Минобороны № 236: рапорт, заявление семьи, приказ о выплате, дети и опекуны',
@@ -139,6 +149,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'money-10',
+    updated: 'ноябрь 2026',
     sectionId: 'money',
     title: 'Страховые выплаты по 52-ФЗ: суммы и как получить',
     summary: 'Ориентиры по тяжёлому и лёгкому увечью, инвалидности, документы и просрочка',
@@ -146,6 +157,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'housing-1',
+    updated: 'ноябрь 2026',
     sectionId: 'housing',
     title: 'Военная ипотека при гибели военнослужащего',
     summary: 'Что будет с накоплениями и кредитом семьи',
@@ -153,6 +165,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'housing-2',
+    updated: 'ноябрь 2026',
     sectionId: 'housing',
     title: 'НИС: как работает накопительно-ипотечная система',
     summary: 'Основы и что проверить участнику',
@@ -160,6 +173,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'health-1',
+    updated: 'ноябрь 2026',
     sectionId: 'health',
     title: 'ВВК: зачем она нужна и как её проходить',
     summary: 'Категории годности, документы и обжалование заключения',
@@ -167,6 +181,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'health-2',
+    updated: 'ноябрь 2026',
     sectionId: 'health',
     title: 'Как обжаловать заключение ВВК через электронную приёмную Минобороны',
     summary: 'Госуслуги, текст жалобы, приложения, сроки, п. 8 Положения о ВВЭ',
@@ -174,6 +189,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'health-3',
+    updated: 'ноябрь 2026',
     sectionId: 'health',
     title: 'Раненому нужно лечение вне полка: как получить направление',
     summary: 'Медпункт, заключение врача, документы, экстренная и плановая помощь',
@@ -181,6 +197,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'health-4',
+    updated: 'ноябрь 2026',
     sectionId: 'health',
     title: 'Независимая военно-врачебная экспертиза',
     summary: 'Как заказать, кто платит, какие у вас права и как использовать заключение',
@@ -188,6 +205,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'health-5',
+    updated: 'ноябрь 2026',
     sectionId: 'health',
     title: 'Отпуск по болезни: лечение в гражданской поликлинике и освидетельствование',
     summary: 'Постановление № 1423, документы, продление отпуска и направление в военкомате',
@@ -195,6 +213,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'family-1',
+    updated: 'ноябрь 2026',
     sectionId: 'family',
     title: 'Детский сад без очереди для детей военнослужащих',
     summary: 'Как оформить первоочередное зачисление',
@@ -202,6 +221,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'family-2',
+    updated: 'ноябрь 2026',
     sectionId: 'family',
     title: 'Алименты с денежного довольствия',
     summary: 'Как их удерживают и что делать при споре',
@@ -209,6 +229,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'family-3',
+    updated: 'ноябрь 2026',
     sectionId: 'family',
     title: 'Выплаты ребёнку после установления отцовства погибшего',
     summary: 'Суд, ЗАГС, страховые и единовременные выплаты, если деньги уже получили другие',
@@ -216,6 +237,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'family-4',
+    updated: 'ноябрь 2026',
     sectionId: 'family',
     title: 'Возраст ребёнка для выплаты считают на день гибели',
     summary: 'Как считать 18–23 года и очное обучение по ФЗ-306',
@@ -223,6 +245,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'legal-1',
+    updated: 'ноябрь 2026',
     sectionId: 'legal',
     title: 'Как подать жалобу военному прокурору',
     summary: 'Форма, сроки, что писать и куда направлять',
@@ -230,6 +253,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'legal-2',
+    updated: 'ноябрь 2026',
     sectionId: 'legal',
     title: 'Как написать рапорт',
     summary: 'Структура, экземпляры и что делать, если рапорт не принимают',
@@ -237,6 +261,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'legal-3',
+    updated: 'ноябрь 2026',
     sectionId: 'legal',
     title: 'Лестница защиты: от рапорта до исполнения',
     summary: 'Семь ступеней, через которые нельзя перепрыгивать',
@@ -244,6 +269,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'legal-4',
+    updated: 'ноябрь 2026',
     sectionId: 'legal',
     title: 'Обращение к Уполномоченному по правам человека',
     summary: 'Онлайн-приёмная ФГИС УПЧ и личный приём в Москве',
@@ -251,6 +277,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'legal-5',
+    updated: 'ноябрь 2026',
     sectionId: 'legal',
     title: 'Как оспорить отказ или бездействие в военном суде',
     summary: 'Требования, сроки по ст. 219 КАС РФ, подсудность и документы к иску',
@@ -258,6 +285,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'service-1',
+    updated: 'ноябрь 2026',
     sectionId: 'service',
     title: 'Контракт о военной службе: на что смотреть',
     summary: 'Срок, условия расторжения и типичные спорные моменты',
@@ -265,6 +293,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'service-2',
+    updated: 'ноябрь 2026',
     sectionId: 'service',
     title: 'Срок контракта истёк, а вас не увольняют',
     summary: 'Мобилизация, основания увольнения и первый шаг — рапорт',
@@ -272,6 +301,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'service-4',
+    updated: 'ноябрь 2026',
     sectionId: 'service',
     title: 'Основания увольнения в период мобилизации',
     summary: 'Указы № 647 и № 580, три режима ст. 51, предельный возраст и семейные основания',
@@ -279,6 +309,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'service-5',
+    updated: 'ноябрь 2026',
     sectionId: 'service',
     title: 'Увольнение по семейным обстоятельствам',
     summary: 'Пять оснований ст. 51, позиции КС РФ (26-П) и ВС РФ (221-КАД24-1-К10), как действовать',
@@ -286,6 +317,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'service-6',
+    updated: 'ноябрь 2026',
     sectionId: 'service',
     title: 'Увольнение по состоянию здоровья: категории Д, В и Г',
     summary: 'Кто подлежит увольнению, у кого право по рапорту, что с приказом № 852',
@@ -293,6 +325,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'service-7',
+    updated: 'ноябрь 2026',
     sectionId: 'service',
     title: 'Категория «В» в военном билете: что она значит',
     summary: 'Призыв, воинский учёт, мобилизация, контракт, увольнение и как оспорить категорию',
@@ -300,6 +333,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'service-3',
+    updated: 'ноябрь 2026',
     sectionId: 'service',
     title: 'Въезд в Россию после снятия с воинского учёта',
     summary: 'Срок уведомления, риск постановки на учёт и повестки',
@@ -307,6 +341,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'after-1',
+    updated: 'ноябрь 2026',
     sectionId: 'after',
     title: 'Как получить статус ветерана боевых действий',
     summary: 'Документы, порядок оформления и основные льготы',
@@ -314,6 +349,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'emergency-1',
+    updated: 'ноябрь 2026',
     sectionId: 'emergency',
     title: 'Военнослужащий пропал без вести: что делать семье',
     summary: 'Часть, военкомат, довольствие, справки по ПП № 1421, прокуратура, суд',
@@ -321,6 +357,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'emergency-2',
+    updated: 'ноябрь 2026',
     sectionId: 'emergency',
     title: 'Гибель военнослужащего: что делать семье',
     summary: 'Документы, выплаты, равные доли и на что обратить внимание',
@@ -328,6 +365,7 @@ export const articles: ArticleMeta[] = [
   },
   {
     id: 'emergency-3',
+    updated: 'ноябрь 2026',
     sectionId: 'emergency',
     title: 'Пропавший без вести: поиск, идентификация и защита от мошенников',
     summary: 'Что можно сделать, чего ждать и как не потерять деньги и нервы',
