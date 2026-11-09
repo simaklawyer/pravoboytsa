@@ -1,7 +1,13 @@
 import { useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { articles, sections } from '../data/sections'
-import { articleBodies } from '../data/articleBodies'
+import { articleBodies as articleBodiesBase } from '../data/articleBodies'
+import { articleBodiesVvk } from '../data/articleBodiesVvk'
+
+const articleBodies: Record<string, string> = {
+  ...articleBodiesBase,
+  ...articleBodiesVvk,
+}
 import { articleChecklists } from '../data/checklists'
 import { useFavoritesStore } from '../store/favoritesStore'
 import { useRecentStore } from '../store/recentStore'
