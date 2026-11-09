@@ -19,19 +19,21 @@ export default function About() {
         <div className="card divide-y divide-border overflow-hidden">
           <a className="block px-4 py-3.5" href={company.phoneHref}>Телефон: {company.phone}</a>
           <a className="block px-4 py-3.5" href={company.telegram}>Telegram: {company.telegramHandle}</a>
-          <a className="block px-4 py-3.5" href={company.siteHref} target="_blank" rel="noreferrer">Сайт: {company.siteLabel}</a>
-          <a className="block px-4 py-3.5" href={company.emailHref}>Электронная почта: {company.email}</a>
+          <a className="block px-4 py-3.5" href={company.siteHref} target="_blank" rel="noreferrer">
+            Сайт: {company.siteLabel}
+          </a>
+          <a className="block px-4 py-3.5" href={company.emailHref}>Почта: {company.email}</a>
         </div>
+        <p className="text-xs text-text-muted mt-3 leading-relaxed">
+          Для личной связи по делу пишите в Telegram {company.telegramHandle}. Информационные публикации
+          в каналах не заменяют переписку с юристом.
+        </p>
       </section>
 
-      <section className="px-5">
-        <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">Политика обработки персональных данных для бота</h2>
-        <div className="card p-4 text-sm text-text-secondary leading-relaxed space-y-3">
-          <p><strong className="text-text-primary">Оператор:</strong> ________________________________.</p>
-          <p>Бот может получить от вас имя, Telegram-контакт и текст заявки.</p>
-          <p>Цель обработки — ответить на ваше обращение и связаться по вопросу, который вы описали.</p>
-          <p>Состояние диалога хранится только в памяти работающего бота и сбрасывается после его перезапуска. Не присылайте паспортные данные, номера счетов и фотографии документов.</p>
-          <p>Для вопросов об обработке данных напишите оператору по контактам выше.</p>
+      <section className="px-5 mb-6">
+        <div className="rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm text-accent-light leading-relaxed">
+          Приложение не собирает персональные данные для учёта или маркетинга. Материалы носят
+          справочный характер и не являются юридической консультацией.
         </div>
       </section>
 
