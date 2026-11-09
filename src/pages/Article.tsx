@@ -3,17 +3,17 @@ import { useParams, Link } from 'react-router-dom'
 import { articles, sections } from '../data/sections'
 import { articleBodies as articleBodiesBase } from '../data/articleBodies'
 import { articleBodiesVvk } from '../data/articleBodiesVvk'
-
-const articleBodies: Record<string, string> = {
-  ...articleBodiesBase,
-  ...articleBodiesVvk,
-}
 import { articleChecklists } from '../data/checklists'
 import { useFavoritesStore } from '../store/favoritesStore'
 import { useRecentStore } from '../store/recentStore'
 import { useChecklistStore } from '../store/checklistStore'
 import BottomNav from '../components/BottomNav'
 import { CompanyCta } from '../components/CompanyCard'
+
+const articleBodies: Record<string, string> = {
+  ...articleBodiesBase,
+  ...articleBodiesVvk,
+}
 
 const EMPTY_CHECKS: string[] = []
 
