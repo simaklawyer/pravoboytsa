@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { Link, useSearchParams } from 'react-router-dom'
 import BottomNav from '../components/BottomNav'
 import { CompanyCta } from '../components/CompanyCard'
@@ -99,12 +100,23 @@ function TemplateEditor({ template }: { template: Template }) {
     }
   }
 
-  const download = () => {
-    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' })
+  const download = async () => {
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: { margin: { top: 1134, right: 850, bottom: 1134, left: 1701 } },
+        },
+        children: text.split('\n').map((line) => new Paragraph({
+          children: [new TextRun({ text: line || ' ', font: 'Times New Roman', size: 28 })],
+          spacing: { line: 360 },
+        })),
+      }],
+    })
+    const blob = await Packer.toBlob(doc)
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${template.id}.txt`
+    a.download = `${template.id}.docx`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -140,8 +152,8 @@ function TemplateEditor({ template }: { template: Template }) {
           <button type="button" className="btn-primary text-sm" onClick={copy}>
             {copied ? 'Скопировано' : 'Скопировать'}
           </button>
-          <button type="button" className="btn-secondary text-sm" onClick={download}>
-            Скачать .txt
+          <button type="button" className="btn-secondary text-sm" onClick={() => void download()}>
+            Скачать .docx
           </button>
         </div>
         <p className="text-xs text-text-muted mt-3 leading-relaxed">
