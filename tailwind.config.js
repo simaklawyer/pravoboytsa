@@ -9,28 +9,28 @@ export default {
       colors: {
         // Deep military background
         bg: {
-          primary: '#0B0F0C',
-          secondary: '#111613',
-          card: '#161C18',
-          elevated: '#1C2420',
+          primary: '#07110C',
+          secondary: '#0B1811',
+          card: '#102219',
+          elevated: '#172D20',
         },
-        // Military emerald / khaki accent
+        // Глубокий хвойный фон и полевой оливковый акцент
         accent: {
-          DEFAULT: '#3D8B6E',
-          light: '#4FA382',
-          dark: '#2E6B55',
-          muted: '#2A5A48',
+          DEFAULT: '#78964F',
+          light: '#9BB96A',
+          dark: '#526D38',
+          muted: '#3B512A',
         },
         // Text
         text: {
-          primary: '#E8EDE9',
-          secondary: '#A3B0A8',
-          muted: '#6B7A72',
+          primary: '#EEF2E8',
+          secondary: '#AAB8A4',
+          muted: '#718173',
         },
         // Borders
         border: {
-          DEFAULT: '#24302A',
-          light: '#2E3C34',
+          DEFAULT: '#203B2A',
+          light: '#31533A',
         }
       },
       fontFamily: {
@@ -42,8 +42,8 @@ export default {
         '3xl': '1.5rem',
       },
       boxShadow: {
-        'card': '0 4px 24px -4px rgba(0, 0, 0, 0.4)',
-        'glow': '0 0 20px -4px rgba(61, 139, 110, 0.3)',
+        'card': '0 8px 28px -10px rgba(0, 0, 0, 0.65)',
+        'glow': '0 0 24px -6px rgba(120, 150, 79, 0.38)',
       }
     },
   },

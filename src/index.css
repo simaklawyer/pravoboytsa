@@ -11,8 +11,10 @@
 
   body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: #0B0F0C;
-    color: #E8EDE9;
+    background-color: #07110C;
+    background-image: radial-gradient(circle at 15% -10%, rgba(120, 150, 79, 0.13), transparent 34rem),
+      linear-gradient(180deg, #0B1811 0%, #07110C 42%, #061009 100%);
+    color: #EEF2E8;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overscroll-behavior: none;
@@ -35,6 +37,7 @@
 @layer components {
   .card {
     @apply bg-bg-card rounded-2xl border border-border shadow-card;
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.025), transparent 42%);
   }
 
   .card-interactive {
@@ -54,6 +57,14 @@
     @apply bg-bg-elevated hover:bg-border-light
            text-text-primary font-medium rounded-xl px-5 py-3
            border border-border transition-colors duration-200;
+  }
+
+  .tool-card {
+    @apply card min-w-0 min-h-[82px] flex flex-col items-center justify-center gap-1.5 p-2.5 text-center;
+  }
+
+  .military-divider {
+    @apply h-px w-full bg-gradient-to-r from-transparent via-accent/45 to-transparent;
   }
 
   .section-label {

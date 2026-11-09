@@ -69,9 +69,9 @@ export default function Home() {
       </div>
 
       <div className="px-5 mb-5">
-        <Link to="/search" className="card flex items-center gap-3 px-4 py-3.5 block">
-          <span className="text-text-muted">🔍</span>
-          <span className="text-text-muted text-[15px]">Что нужно найти?</span>
+        <Link to="/search" className="card flex items-center gap-3 px-4 py-3.5 block border-accent/25">
+          <span className="text-accent">⌕</span>
+          <span className="text-text-muted text-[15px]">Найти статью или вопрос</span>
         </Link>
       </div>
 
@@ -79,28 +79,28 @@ export default function Home() {
         <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
           Инструменты
         </h2>
-        <div className="grid grid-cols-5 gap-1.5">
-          <Link to="/navigator" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <Link to="/navigator" className="tool-card hover:border-accent/50 transition-all">
             <div className="text-lg mb-1">🧭</div>
-            <div className="text-[10px] font-medium leading-snug">Ступени</div>
+            <div className="text-[11px] font-medium leading-tight">Ступени</div>
           </Link>
-          <Link to="/case" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+          <Link to="/case" className="tool-card hover:border-accent/50 transition-all">
             <div className="text-lg mb-1">📋</div>
-            <div className="text-[10px] font-medium leading-snug">
+            <div className="text-[11px] font-medium leading-tight">
               {caseCount === 0 ? 'Моё дело' : `Дела: ${caseCount}`}
             </div>
           </Link>
-          <Link to="/calc" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+          <Link to="/calc" className="tool-card hover:border-accent/50 transition-all">
             <div className="text-lg mb-1">🧮</div>
-            <div className="text-[10px] font-medium leading-snug">Расчёты</div>
+            <div className="text-[11px] font-medium leading-tight">Расчёты</div>
           </Link>
-          <Link to="/draft" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+          <Link to="/draft" className="tool-card hover:border-accent/50 transition-all">
             <div className="text-lg mb-1">✍️</div>
-            <div className="text-[10px] font-medium leading-snug">Документы</div>
+            <div className="text-[11px] font-medium leading-tight break-words">Документы</div>
           </Link>
-          <Link to="/contacts" className="card p-2.5 text-center hover:border-accent/30 transition-all">
+          <Link to="/contacts" className="tool-card hover:border-accent/50 transition-all">
             <div className="text-lg mb-1">📞</div>
-            <div className="text-[10px] font-medium leading-snug">Контакты</div>
+            <div className="text-[11px] font-medium leading-tight">Контакты</div>
           </Link>
         </div>
       </div>

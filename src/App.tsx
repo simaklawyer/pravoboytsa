@@ -23,8 +23,8 @@ function App() {
     if (tg) {
       tg.ready()
       tg.expand()
-      tg.setHeaderColor('#0B0F0C')
-      tg.setBackgroundColor('#0B0F0C')
+      tg.setHeaderColor('#0B1811')
+      tg.setBackgroundColor('#07110C')
     }
   }, [])
 
