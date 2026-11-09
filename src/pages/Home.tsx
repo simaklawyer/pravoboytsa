@@ -18,11 +18,11 @@ const roleLabels: Record<string, string> = {
 
 /** Подборка статей для главной: что чаще всего нужно каждой роли. */
 const recommendedByRole: Record<string, string[]> = {
-  contract: ['service-2', 'service-4', 'health-1'],
-  svo: ['money-8', 'money-4', 'money-5'],
-  relative: ['emergency-1', 'emergency-3', 'money-9'],
+  contract: ['service-2', 'money-11', 'housing-3'],
+  svo: ['money-8', 'money-11', 'health-6'],
+  relative: ['emergency-1', 'emergency-4', 'money-9'],
   veteran: ['money-6', 'after-1', 'legal-3'],
-  conscript: ['legal-2', 'health-1', 'legal-1'],
+  conscript: ['conscript-report', 'conscript-vvk', 'conscript-health-dismissal'],
 }
 
 const quickActions = [
