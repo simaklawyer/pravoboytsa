@@ -30,7 +30,6 @@ export default function Profile() {
         <h1 className="text-xl font-semibold">Профиль</h1>
       </div>
 
-      {/* Current role */}
       <div className="px-5 mb-6">
         <div className="card p-5 flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-accent/15 flex items-center justify-center text-3xl">
@@ -45,7 +44,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Favorites */}
       <div className="px-5 mb-6">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">
@@ -65,7 +63,7 @@ export default function Profile() {
           <div className="card p-5 text-center">
             <div className="text-2xl mb-2">☆</div>
             <p className="text-sm text-text-secondary">
-              Пока пусто. Отмечайте нужные статьи звёздочкой, и они появятся здесь.
+              Пока пусто. Отмечайте статьи звёздочкой — они появятся здесь.
             </p>
           </div>
         ) : (
@@ -76,7 +74,7 @@ export default function Profile() {
                 to={`/article/${article.id}`}
                 className="card p-3.5 block hover:border-accent/30 transition-all"
               >
-                <div className="font-medium text-[14px] leading-snug">
+                <div className="font-medium text-[15px] leading-snug">
                   {article.title}
                 </div>
                 <div className="text-xs text-text-muted mt-1 line-clamp-1">
@@ -88,7 +86,6 @@ export default function Profile() {
         )}
       </div>
 
-      {/* Change role */}
       <div className="px-5 mb-6">
         <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
           Сменить роль
@@ -113,7 +110,6 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="px-5 mb-6">
         <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
           Действия
@@ -126,24 +122,20 @@ export default function Profile() {
             }}
             className="w-full px-4 py-3.5 text-left text-[15px] text-red-400 hover:bg-bg-elevated transition-colors"
           >
-            Сбросить роль и выбрать заново
+            Сбросить и выбрать роль заново
           </button>
         </div>
       </div>
 
-      <div className="px-5 mb-6">
-        <CompanyCard title="О нас и связь с юристом" />
-        <Link to="/about" className="text-sm text-accent inline-block mt-3">Контакты и политика обработки данных →</Link>
-      </div>
-
-      {/* Info */}
       <div className="px-5">
-        <div className="rounded-xl bg-bg-elevated border border-border px-4 py-3 text-sm text-text-secondary leading-relaxed">
-          🔒 Роль, избранное, чек-листы и «Моё дело» хранятся только на вашем устройстве.
+        <CompanyCard title="О нас и связь с юристом" />
+        <Link to="/about" className="text-sm text-accent inline-block mt-3">Контакты и связь →</Link>
+        <div className="rounded-xl bg-bg-elevated border border-border px-4 py-3 text-sm text-text-secondary leading-relaxed mt-4">
           ПравоБойца не запрашивает ваше имя, телефон и данные Telegram-аккаунта.
+          Мы видим только анонимную статистику открытых статей.
         </div>
         <p className="text-center text-xs text-text-muted mt-4">
-          {materials(articles.length)} · справочный характер
+          База знаний · справочный характер · {materials(articles.length)}
         </p>
       </div>
 
