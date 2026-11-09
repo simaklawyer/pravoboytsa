@@ -39,7 +39,7 @@ log = logging.getLogger("pravoboytsa-bot")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "").rstrip("/")
 COMPANY_PHONE = "8 (800) 600 02 13"
-COMPANY_TG = "https://t.me/pravoboitsa"
+COMPANY_TG = "https://t.me/Koroleva_Anastasia"
 COMPANY_SITE = "http://xn----7sbbdd8b6acdk7e.xn--p1ai"  # Право-бойца.рф
 COMPANY_SITE_LABEL = "Право-бойца.рф"
 COMPANY_EMAIL = "1000@pboitsa.ru"
@@ -58,85 +58,72 @@ ADMIN_CHAT_ID = _int_env("ADMIN_CHAT_ID")
 # Состояние воронки заявки и источник перехода (deep link).
 # Хранится в памяти процесса: при перезапуске сервиса сбрасывается, ничего лишнего не копим.
 LEADS: dict[int, dict] = {}
-USER_SOURCE: dict[int, str] = {}
 
-ROLES = {"mil": "Военнослужащий", "rel": "Родственник военнослужащего", "vet": "Ветеран или бывший военнослужащий", "oth": "Другое"}
-TOPICS = {
-    "wound": ("Ранение и выплаты", ["money-8", "money-4", "money-5"], "u98"),
-    "vvk": ("ВВК и здоровье", ["health-1", "health-2", "health-4"], "vvk"),
-    "fire": ("Увольнение и контракт", ["service-2", "service-4", "service-6"], "contract-end"),
-    "pay": ("Довольствие и выплаты", ["money-1", "money-3", "money-9"], "pay"),
-    "mia": ("Пропал без вести или гибель", ["emergency-1", "emergency-3", "emergency-2"], "dd-family"),
-    "oth": ("Другое", ["legal-3", "legal-1"], None),
+ROLES = {
+    "s": "Военнослужащий",
+    "r": "Родственник",
+    "v": "Ветеран / уволенный",
+    "o": "Другое",
 }
+
+TOPICS = {
+    "pay": ("Выплаты / довольствие", ["money-1", "money-2"], None),
+    "vvk": ("ВВК / здоровье", ["health-1", "health-7"], None),
+    "dis": ("Увольнение", ["service-8", "service-2"], None),
+    "fam": ("Семья", ["family-1"], None),
+    "mia": ("Пропал / гибель", ["emergency-1", "emergency-2"], None),
+    "oth": ("Другое", [], None),
+}
+
 DOCS = {
     "none": "Документов нет",
-    "report": "Рапорт подан, ответа нет",
-    "refusal": "Получен отказ",
-    "have": "Документы собраны",
+    "report": "Есть рапорт / заявление",
+    "refusal": "Есть отказ",
+    "order": "Есть приказ / заключение",
 }
-DOCS_HINT = {
-    "none": "Начните с рапорта: готовый шаблон есть в разделе «Документы». Подайте его под входящий номер или письмом с описью.",
-    "report": "Если с подачи рапорта прошло 30 суток, переходите к жалобе военному прокурору (статья «Как подать жалобу военному прокурору»).",
-    "refusal": "Сохраните отказ и требуйте письменное мотивированное решение: на нём строится жалоба и иск (статья «Лестница защиты»).",
-    "have": "Проверьте, что в пакете есть подтверждение вручения: входящий номер или почтовая опись.",
-}
-URGENT = {"now": "Сегодня или завтра", "week": "На этой неделе", "calm": "Не срочно"}
-URGENT_ICON = {"now": "🔴", "week": "🟡", "calm": "⚪"}
-ARTICLE_TITLES = {
-    "money-1": "Денежное довольствие", "money-3": "Выплаты при увольнении", "money-4": "Выплаты при ранении",
-    "money-5": "Справки 100 и 98", "money-8": "Указ № 98: когда положена выплата", "money-9": "Порядок выплат по Указу № 98",
-    "health-1": "ВВК: как проходить", "health-2": "Обжалование заключения ВВК", "health-4": "Независимая экспертиза",
-    "service-2": "Контракт истёк, не увольняют", "service-4": "Основания увольнения в мобилизацию",
-    "service-6": "Увольнение по здоровью: Д, В, Г", "emergency-1": "Пропал без вести: что делать семье",
-    "emergency-2": "Гибель военнослужащего", "emergency-3": "Поиск и защита от мошенников",
-    "legal-1": "Жалоба военному прокурору", "legal-3": "Лестница защиты",
-}
-TEMPLATE_TITLES = {
-    "u98": "Шаблон: рапорт на выплату за ранение", "vvk": "Шаблон: рапорт на ВВК",
-    "contract-end": "Шаблон: рапорт об увольнении", "pay": "Шаблон: рапорт о невыплате довольствия",
-    "dd-family": "Шаблон: заявление о довольствии семье",
-    "mia-pay": "Шаблон: жалоба прокурору о невыплате",
-}
-WEBHOOK_PATH = "/webhook"
 
-# Шаблоны — регулярные выражения (границы слов, чтобы «нис» не находилось в «жизнь»).
+URGENT = {
+    "now": "Срочно (дни)",
+    "soon": "На этой неделе",
+    "later": "Не срочно",
+}
+
 HINTS: list[tuple[list[str], str]] = [
     (
-        [r"ранен", r"увечь", r"травм", r"контуз"],
-        "Выплаты при ранении — раздел «Деньги и выплаты»: статьи «Выплаты при ранении на СВО» и «Справки 100 и 98».",
+        ["ранен", "увечь", "травм", "контуз"],
+        "По ранениям и выплатам откройте в приложении раздел «Деньги и выплаты» → «Выплаты при ранении».",
     ),
     (
-        [r"пропал", r"без вести", r"не выходит на связь", r"не на связи", r"нет связи"],
-        "Если боец не на связи, откройте раздел «Экстренные ситуации» → «Военнослужащий пропал без вести»: первые шаги и куда писать.",
+        ["пропал", "без вести", "связь пропал", "не выходит на связь"],
+        "Если боец не на связи — раздел «Экстренные ситуации» → «Пропал без вести»: первые шаги и куда писать.",
     ),
     (
-        [r"\bввк\b", r"военно-врачеб", r"годност", r"медкомисс"],
-        "ВВК и годность — раздел «Здоровье и комиссии». Соберите выписки до комиссии.",
+        ["ввк", "военно-врачеб", "категори.*годност", "медкомисс"],
+        "ВВК и годность — раздел «Здоровье и комиссии». Соберите выписки до комиссии. Есть материалы по обжалованию.",
     ),
     (
-        [r"ипотек", r"\bнис\b", r"жиль", r"квартир"],
+        ["ипотек", "нис", "жиль", "квартир"],
         "Жильё и НИС — раздел «Жильё и недвижимость».",
     ),
     (
-        [r"рапорт", r"входящ", r"командир"],
-        "Как написать рапорт и что делать, если номер не ставят, — раздел «Защита прав». В приложении есть готовые шаблоны рапортов и заявлений (раздел «Документы» на главной).",
+        ["рапорт", "входящ", "командир"],
+        "Как писать рапорт и что делать, если номер не ставят — «Защита прав» → материалы про рапорт.",
     ),
     (
-        [r"прокур", r"жалоб"],
-        "Жалоба военному прокурору — раздел «Защита прав». Определить свой шаг поможет «Где вы сейчас» (кнопка «Ступени» на главной).",
+        ["прокур", "жалоб"],
+        "Жалоба военному прокурору — раздел «Защита прав».",
     ),
     (
-        [r"детск", r"\bсад\b", r"алимент", r"\bсемь", r"\bжен[аыуе]\b", r"вдов"],
-        "Семья: пособия, дети, жильё после утраты — разделы «Семья и дети» и «Экстренные ситуации».",
+        ["детск", "сад", "алимент", "семья", "жен", "вдов"],
+        "Семья: пособия, дети, жильё после утраты — разделы «Семья» и «Экстренные ситуации».",
     ),
     (
-        [r"ветеран", r"льгот", r"увольн", r"контракт"],
-        "Контракт и увольнение — раздел «Служба», статус и льготы — раздел «После службы».",
+        ["ветеран", "льгот", "увольн"],
+        "Статус и льготы после службы — раздел «После службы». Увольнение — «Служба».",
     ),
     (
-        [r"довольств", r"оклад", r"не плат", r"зарплат", r"денежн"],
-        "Денежное довольствие и перерасчёт — раздел «Деньги и выплаты».",
+        ["довольств", "оклад", "не плат", "зарплат", "денежн"],
+        "Денежное довольствие и перерасчёт — «Деньги и выплаты».",
     ),
 ]
 
@@ -145,7 +132,12 @@ def main_keyboard() -> InlineKeyboardMarkup:
     rows: list[list[InlineKeyboardButton]] = []
     if WEBAPP_URL:
         rows.append(
-            [InlineKeyboardButton(text="Открыть ПравоБойца", web_app=WebAppInfo(url=WEBAPP_URL))]
+            [
+                InlineKeyboardButton(
+                    text="Открыть ПравоБойца",
+                    web_app=WebAppInfo(url=WEBAPP_URL),
+                )
+            ]
         )
     rows.append(
         [
@@ -154,7 +146,6 @@ def main_keyboard() -> InlineKeyboardMarkup:
         ]
     )
     rows.append([InlineKeyboardButton(text=COMPANY_SITE_LABEL, url=COMPANY_SITE)])
-    rows.append([InlineKeyboardButton(text="Политика обработки данных", url=f"{WEBAPP_URL}/about" if WEBAPP_URL else COMPANY_SITE)])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
@@ -178,17 +169,13 @@ def start_text(first_name: str | None) -> str:
         "Напишите вопрос своими словами, и я подскажу, где искать ответ. "
         "Например: «не приходит довольствие», «как пройти ВВК», «муж не на связи».\n\n"
         "Если ситуация сложная, нажмите «Оставить заявку»: четыре вопроса, и юрист свяжется с вами.\n\n"
-        f"Телефон: {COMPANY_PHONE}\n\n"
-        "Политика обработки данных: " + (f"{WEBAPP_URL}/about" if WEBAPP_URL else COMPANY_SITE) + "\n\n"
+        f"Телефон: {COMPANY_PHONE}\n"
+        f"Telegram: {COMPANY_TG}\n\n"
         "Материалы справочные и не заменяют очную консультацию."
     )
 
 
-LEAD_CONSENT = (
-    "Не присылайте паспортные данные, номера счетов и фото документов. "
-    "Отправляя заявку, вы соглашаетесь, что мы обработаем её и ваш Telegram-контакт, "
-    "чтобы ответить вам. Отменить: /cancel"
-)
+LEAD_CONSENT = ""  # заявка только для связи
 
 
 def _kb(rows: list[list[tuple[str, str]]]) -> InlineKeyboardMarkup:
@@ -207,26 +194,25 @@ def lead_question(step: str) -> tuple[str, InlineKeyboardMarkup]:
     if step == "urgent":
         return ("Вопрос 4 из 4. Насколько срочно?", _kb([[(t, f"lf:urgent:{k}")] for k, t in URGENT.items()]))
     return (
-        "Опишите ситуацию в одном-двух предложениях или нажмите «Пропустить».\n\n" + LEAD_CONSENT,
+        "Опишите ситуацию в одном-двух предложениях или нажмите «Пропустить».",
         _kb([[("Пропустить", "lf:text:skip")]]),
     )
 
 
 def waiting_keyboard(topic: str, docs: str = "none") -> InlineKeyboardMarkup:
-    """Пока человек ждёт ответа: статьи по теме и шаблон документа."""
     _, article_ids, template_id = TOPICS.get(topic, TOPICS["oth"])
-    # Семья пропавшего уже подала заявление в часть — полезнее жалоба прокурору.
     if topic == "mia" and docs in ("report", "refusal"):
         template_id = "mia-pay"
     rows: list[list[InlineKeyboardButton]] = []
     if WEBAPP_URL:
         for aid in article_ids:
             rows.append(
-                [InlineKeyboardButton(text=ARTICLE_TITLES.get(aid, aid), web_app=WebAppInfo(url=f"{WEBAPP_URL}/article/{aid}"))]
-            )
-        if template_id:
-            rows.append(
-                [InlineKeyboardButton(text=TEMPLATE_TITLES.get(template_id, "Шаблон документа"), web_app=WebAppInfo(url=f"{WEBAPP_URL}/draft?t={template_id}"))]
+                [
+                    InlineKeyboardButton(
+                        text=f"Статья: {aid}",
+                        web_app=WebAppInfo(url=f"{WEBAPP_URL}/article/{aid}"),
+                    )
+                ]
             )
     rows.append([InlineKeyboardButton(text="Написать юристу", url=LAWYER_URL)])
     return InlineKeyboardMarkup(inline_keyboard=rows)
@@ -244,147 +230,139 @@ def match_hint(text: str) -> str | None:
 def build_dispatcher() -> Dispatcher:
     dp = Dispatcher()
 
-    async def cmd_start(message: Message, command: CommandObject) -> None:
+    async def cmd_start(message: Message) -> None:
+        log.info("/start from id=%s", message.from_user.id if message.from_user else "?")
         user = message.from_user
-        payload = (command.args or "").strip()
-        log.info("/start id=%s payload=%s", user.id if user else "?", payload[:40] or "-")
-        if user and payload:
-            USER_SOURCE[user.id] = payload[:64]
-
-        # Глубокая ссылка на статью: t.me/<бот>?start=art_money-8
-        m = re.fullmatch(r"art_([a-z]+-\d+)", payload)
-        if m and WEBAPP_URL:
-            await message.answer(
-                "Открываю нужную статью. Если после чтения останутся вопросы, "
-                "оставьте заявку или позвоните: " + COMPANY_PHONE,
-                reply_markup=InlineKeyboardMarkup(
-                    inline_keyboard=[
-                        [
-                            InlineKeyboardButton(
-                                text="Читать статью",
-                                web_app=WebAppInfo(url=f"{WEBAPP_URL}/article/{m.group(1)}"),
-                            )
-                        ],
-                        [InlineKeyboardButton(text="Оставить заявку", callback_data="lead")],
-                    ]
-                ),
-            )
-            return
-
-        text = start_text(user.first_name if user else None)
+        name = user.first_name if user else None
+        text = start_text(name)
         if not WEBAPP_URL:
-            text += "\n\n⚠️ Администратору: задайте переменную WEBAPP_URL."
+            text += "\n\n⚠️ Администратору: задайте WEBAPP_URL."
         await message.answer(text, reply_markup=main_keyboard())
 
-    async def cmd_contacts(message: Message) -> None:
-        await message.answer(contacts_text(), reply_markup=main_keyboard())
-
-    async def cmd_cancel(message: Message) -> None:
-        if message.from_user:
-            LEADS.pop(message.from_user.id, None)
-        await message.answer("Отменил. Если понадобится помощь, нажмите «Оставить заявку».", reply_markup=main_keyboard())
-
-    async def finish_lead(bot: Bot, user, text: str, reply_to: Message) -> None:
-        data = LEADS.pop(user.id, {"a": {}})["a"]
-        topic = data.get("topic", "oth")
-        topic_title = TOPICS.get(topic, TOPICS["oth"])[0]
-        urgent = data.get("urgent", "calm")
-        docs_key = data.get("docs", "none")
-
-        sent = False
-        if ADMIN_CHAT_ID:
-            username = f"@{user.username}" if user.username else "без username"
-            try:
-                await bot.send_message(
-                    ADMIN_CHAT_ID,
-                    f"{URGENT_ICON.get(urgent, '⚪')} Новая заявка из бота\n"
-                    f"От: {user.full_name} ({username}), id {user.id}\n"
-                    f"Кто: {ROLES.get(data.get('role', 'oth'), '-')}\n"
-                    f"Тема: {topic_title}\n"
-                    f"Документы: {DOCS.get(docs_key, '-')}\n"
-                    f"Срочность: {URGENT.get(urgent, '-')}\n"
-                    f"Источник: {USER_SOURCE.get(user.id, '-')}\n\n"
-                    f"{text[:3000] or '(без описания)'}",
-                )
-                sent = True
-            except Exception:
-                log.exception("Failed to forward lead")
-        else:
-            log.warning("Lead received but ADMIN_CHAT_ID is not set")
-
-        if sent:
-            head = "Заявка принята. Мы свяжемся с вами в Telegram."
-            if urgent == "now":
-                head += f" Если вопрос срочный, позвоните: {COMPANY_PHONE}."
-        else:
-            head = f"Сейчас приём заявок в боте не работает. Позвоните нам: {COMPANY_PHONE}, или напишите в Telegram."
-        await reply_to.answer(
-            f"{head}\n\nПока ждёте ответа, вот что поможет прямо сейчас.\n\n{DOCS_HINT.get(docs_key, '')}",
-            reply_markup=waiting_keyboard(topic, docs_key),
-        )
-
-    async def on_lead_button(call: CallbackQuery) -> None:
-        await call.answer()
-        LEADS[call.from_user.id] = {"step": "role", "a": {}}
-        if call.message:
-            q, kb = lead_question("role")
-            await call.message.answer(q, reply_markup=kb)
-
-    async def on_lead_answer(call: CallbackQuery) -> None:
-        await call.answer()
-        user = call.from_user
-        parts = (call.data or "").split(":")
-        if len(parts) != 3 or user.id not in LEADS or not call.message:
-            return
-        _, key, val = parts
-        state = LEADS[user.id]
-        if key == "text":
-            await finish_lead(call.message.bot, user, "", call.message)
-            return
-        state["a"][key] = val
-        order = ["role", "topic", "docs", "urgent", "text"]
-        nxt = order[order.index(key) + 1] if key in order else "text"
-        state["step"] = nxt
-        q, kb = lead_question(nxt)
-        await call.message.answer(q, reply_markup=kb)
-
-    async def on_text(message: Message) -> None:
-        body = (message.text or "").strip()
-        user = message.from_user
-        if not body or not user:
-            return
-
-        state = LEADS.get(user.id)
-        if state and state.get("step") == "text":
-            await finish_lead(message.bot, user, body, message)
-            return
-        if state:
-            q, kb = lead_question(state["step"])
-            await message.answer("Выберите вариант кнопкой.\n\n" + q, reply_markup=kb)
-            return
-
-        log.info("text hint query len=%s", len(body))
-        hint = match_hint(body)
-        if hint:
-            await message.answer(
-                f"{hint}\n\nПолный текст и чек-листы есть в приложении. "
-                "Если нужен разбор вашей ситуации, нажмите «Оставить заявку».",
-                reply_markup=main_keyboard(),
+    async def on_ask_lawyer(callback: CallbackQuery) -> None:
+        await callback.answer()
+        if callback.message:
+            await callback.message.answer(
+                "Напишите кратко: кто вы (военный / родственник), суть проблемы.\n"
+                f"Или сразу в Telegram: {COMPANY_TG}",
+                reply_markup=InlineKeyboardMarkup(
+                    inline_keyboard=[[InlineKeyboardButton(text="Написать юристу", url=LAWYER_URL)]]
+                ),
             )
+
+    async def on_lead_start(callback: CallbackQuery) -> None:
+        await callback.answer()
+        uid = callback.from_user.id if callback.from_user else 0
+        LEADS[uid] = {"step": "role"}
+        if callback.message:
+            q, kb = lead_question("role")
+            await callback.message.answer(q, reply_markup=kb)
+
+    async def on_lead_flow(callback: CallbackQuery) -> None:
+        await callback.answer()
+        if not callback.data or not callback.from_user:
             return
-        await message.answer(
-            "Точного совпадения не нашёл. Откройте «ПравоБойца» и воспользуйтесь поиском "
-            "внутри приложения или задайте вопрос короче: выплата, ВВК, жильё, рапорт, пропал.\n\n"
-            "Если нужен ответ юриста по вашему случаю, нажмите «Оставить заявку».",
-            reply_markup=main_keyboard(),
+        uid = callback.from_user.id
+        parts = callback.data.split(":")
+        if len(parts) < 3:
+            return
+        _, field, value = parts[0], parts[1], ":".join(parts[2:])
+        state = LEADS.setdefault(uid, {})
+        state[field] = value
+
+        order = ["role", "topic", "docs", "urgent", "text"]
+        try:
+            idx = order.index(field)
+        except ValueError:
+            return
+        next_step = order[idx + 1] if idx + 1 < len(order) else None
+
+        if next_step == "text":
+            state["step"] = "text"
+            q, kb = lead_question("text")
+            if callback.message:
+                await callback.message.answer(q, reply_markup=kb)
+            return
+
+        if next_step:
+            state["step"] = next_step
+            q, kb = lead_question(next_step)
+            if callback.message:
+                await callback.message.answer(q, reply_markup=kb)
+            return
+
+        # finish without free text
+        await _finish_lead(callback.message, uid, state, "")
+
+    async def on_lead_text(message: Message) -> None:
+        if not message.from_user:
+            return
+        uid = message.from_user.id
+        state = LEADS.get(uid)
+        if not state or state.get("step") != "text":
+            # ordinary chat
+            hint = match_hint(message.text or "")
+            if hint:
+                await message.answer(hint, reply_markup=main_keyboard())
+            else:
+                await message.answer(
+                    "Напишите вопрос своими словами или откройте приложение.\n"
+                    f"Связь с юристом: {COMPANY_TG}",
+                    reply_markup=main_keyboard(),
+                )
+            return
+        await _finish_lead(message, uid, state, message.text or "")
+
+    async def _finish_lead(message: Message | None, uid: int, state: dict, free_text: str) -> None:
+        LEADS.pop(uid, None)
+        role = ROLES.get(state.get("role", ""), state.get("role", "?"))
+        topic_key = state.get("topic", "oth")
+        topic_title = TOPICS.get(topic_key, TOPICS["oth"])[0]
+        docs = DOCS.get(state.get("docs", ""), state.get("docs", "?"))
+        urgent = URGENT.get(state.get("urgent", ""), state.get("urgent", "?"))
+        summary = (
+            f"Заявка\n"
+            f"Роль: {role}\n"
+            f"Тема: {topic_title}\n"
+            f"Документы: {docs}\n"
+            f"Срочность: {urgent}\n"
+            f"Текст: {free_text or '—'}\n"
+            f"User id: {uid}"
         )
+        if message:
+            if ADMIN_CHAT_ID:
+                try:
+                    bot = message.bot
+                    await bot.send_message(ADMIN_CHAT_ID, summary)
+                    head = "Заявка принята. Мы свяжемся с вами в Telegram."
+                except Exception as e:
+                    log.exception("admin notify failed: %s", e)
+                    head = f"Сейчас приём заявок в боте не работает. Напишите в Telegram: {COMPANY_TG}"
+            else:
+                head = f"Сейчас приём заявок в боте не работает. Позвоните: {COMPANY_PHONE}, или напишите в Telegram."
+            await message.answer(
+                head,
+                reply_markup=waiting_keyboard(topic_key, state.get("docs", "none")),
+            )
+
+    async def on_lf_text_skip(callback: CallbackQuery) -> None:
+        await callback.answer()
+        if not callback.from_user:
+            return
+        uid = callback.from_user.id
+        state = LEADS.get(uid, {})
+        await _finish_lead(callback.message, uid, state, "")
 
     dp.message.register(cmd_start, CommandStart())
-    dp.message.register(cmd_contacts, Command("contacts"))
-    dp.message.register(cmd_cancel, Command("cancel"))
-    dp.callback_query.register(on_lead_button, F.data == "lead")
-    dp.callback_query.register(on_lead_answer, F.data.startswith("lf:"))
-    dp.message.register(on_text, F.text)
+    dp.callback_query.register(on_ask_lawyer, F.data == "ask_lawyer")
+    dp.callback_query.register(on_lead_start, F.data == "lead")
+    dp.callback_query.register(on_lead_flow, F.data.startswith("lf:role:"))
+    dp.callback_query.register(on_lead_flow, F.data.startswith("lf:topic:"))
+    dp.callback_query.register(on_lead_flow, F.data.startswith("lf:docs:"))
+    dp.callback_query.register(on_lead_flow, F.data.startswith("lf:urgent:"))
+    dp.callback_query.register(on_lf_text_skip, F.data == "lf:text:skip")
+    dp.message.register(on_lead_text, F.text)
+
     return dp
 
 
@@ -415,7 +393,6 @@ def run_webhook(bot: Bot, dp: Dispatcher) -> None:
     webhook_url = f"{base}{WEBHOOK_PATH}"
 
     async def on_startup(app: web.Application) -> None:
-        # Не удаляем webhook при рестартах Render — иначе Telegram теряет доставку.
         await bot.set_webhook(
             url=webhook_url,
             drop_pending_updates=False,
@@ -425,8 +402,6 @@ def run_webhook(bot: Bot, dp: Dispatcher) -> None:
         log.info("Webhook set: %s (pending=%s)", info.url, info.pending_update_count)
 
     async def on_shutdown(app: web.Application) -> None:
-        # Важно: НЕ вызываем delete_webhook — при Timed Out/рестарте Render
-        # webhook должен остаться, иначе бот «молчит» до следующего удачного старта.
         log.info("Shutdown: closing bot session (webhook kept)")
         await bot.session.close()
 
@@ -446,6 +421,9 @@ def run_webhook(bot: Bot, dp: Dispatcher) -> None:
 
     log.info("Starting webhook server 0.0.0.0:%s url=%s", port, webhook_url)
     web.run_app(app, host="0.0.0.0", port=port, print=lambda *a, **k: None)
+
+
+WEBHOOK_PATH = "/webhook"
 
 
 def main() -> None:
