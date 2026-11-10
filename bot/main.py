@@ -372,6 +372,7 @@ def webhook_base() -> str:
     base = (
         os.environ.get("WEBHOOK_BASE", "").strip()
         or os.environ.get("RENDER_EXTERNAL_URL", "").strip()
+        or "https://pravoboytsa-bot.onrender.com"
     )
     return base.rstrip("/")
 
