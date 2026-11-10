@@ -2,12 +2,14 @@
 ПравоБойца — Telegram-бот (aiogram 3.x).
 
 Локально: long polling.
-Render Free (Web Service): webhook на PORT.
+Render Free (Web Service): long polling + /health на PORT.
+Опционально USE_WEBHOOK=1 для webhook-режима.
 
 Переменные:
   BOT_TOKEN, WEBAPP_URL
   ADMIN_CHAT_ID (опц.) — чат/пользователь, куда приходят заявки из бота
   LAWYER_URL (опц.) — если не задан, кнопка ведёт в Telegram компании
+  USE_WEBHOOK=1 (опц.) — включить webhook вместо polling
   WEBHOOK_BASE=https://pravoboytsa-bot.onrender.com
 """
 
@@ -37,12 +39,10 @@ logging.basicConfig(
 log = logging.getLogger("pravoboytsa-bot")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
-# Рабочий адрес Mini App по умолчанию: кнопка в боте не пропадёт,
-# даже если WEBAPP_URL забыли добавить в переменные окружения хостинга.
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "").strip().rstrip("/") or "https://pravoboytsa.vercel.app"
 COMPANY_PHONE = "8 (800) 600 02 13"
 COMPANY_TG = "https://t.me/pravoboitsa"
-COMPANY_SITE = "https://xn----7sbbdd8b6acdk7e.xn--p1ai"  # право-бойца.рф
+COMPANY_SITE = "https://xn----7sbbdd8b6acdk7e.xn--p1ai"
 COMPANY_SITE_LABEL = "право-бойца.рф"
 COMPANY_EMAIL = "1000@pboitsa.ru"
 LAWYER_URL = os.environ.get("LAWYER_URL", "").strip() or "https://t.me/pravoboitsames"
@@ -56,9 +56,6 @@ def _int_env(name: str) -> int:
 
 
 ADMIN_CHAT_ID = _int_env("ADMIN_CHAT_ID")
-
-# Состояние воронки заявки и источник перехода (deep link).
-# Хранится в памяти процесса: при перезапуске сервиса сбрасывается, ничего лишнего не копим.
 LEADS: dict[int, dict] = {}
 
 ROLES = {
@@ -91,62 +88,26 @@ URGENT = {
 }
 
 HINTS: list[tuple[list[str], str]] = [
-    (
-        ["ранен", "увечь", "травм", "контуз"],
-        "По ранениям и выплатам откройте в приложении раздел «Деньги и выплаты» → «Выплаты при ранении».",
-    ),
-    (
-        ["пропал", "без вести", "связь пропал", "не выходит на связь"],
-        "Если боец не на связи — раздел «Экстренные ситуации» → «Пропал без вести»: первые шаги и куда писать.",
-    ),
-    (
-        ["ввк", "военно-врачеб", "категори.*годност", "медкомисс"],
-        "ВВК и годность — раздел «Здоровье и комиссии». Соберите выписки до комиссии. Есть материалы по обжалованию.",
-    ),
-    (
-        ["ипотек", "нис", "жиль", "квартир"],
-        "Жильё и НИС — раздел «Жильё и недвижимость».",
-    ),
-    (
-        ["рапорт", "входящ", "командир"],
-        "Как писать рапорт и что делать, если номер не ставят — «Защита прав» → материалы про рапорт.",
-    ),
-    (
-        ["прокур", "жалоб"],
-        "Жалоба военному прокурору — раздел «Защита прав».",
-    ),
-    (
-        ["детск", "сад", "алимент", "семья", "жен", "вдов"],
-        "Семья: пособия, дети, жильё после утраты — разделы «Семья» и «Экстренные ситуации».",
-    ),
-    (
-        ["ветеран", "льгот", "увольн"],
-        "Статус и льготы после службы — раздел «После службы». Увольнение — «Служба».",
-    ),
-    (
-        ["довольств", "оклад", "не плат", "зарплат", "денежн"],
-        "Денежное довольствие и перерасчёт — «Деньги и выплаты».",
-    ),
+    (["ранен", "увечь", "травм", "контуз"], "По ранениям и выплатам откройте в приложении раздел «Деньги и выплаты» → «Выплаты при ранении»."),
+    (["пропал", "без вести", "связь пропал", "не выходит на связь"], "Если боец не на связи — раздел «Экстренные ситуации» → «Пропал без вести»: первые шаги и куда писать."),
+    (["ввк", "военно-врачеб", "категори.*годност", "медкомисс"], "ВВК и годность — раздел «Здоровье и комиссии». Соберите выписки до комиссии. Есть материалы по обжалованию."),
+    (["ипотек", "нис", "жиль", "квартир"], "Жильё и НИС — раздел «Жильё и недвижимость»."),
+    (["рапорт", "входящ", "командир"], "Как писать рапорт и что делать, если номер не ставят — «Защита прав» → материалы про рапорт."),
+    (["прокур", "жалоб"], "Жалоба военному прокурору — раздел «Защита прав»."),
+    (["детск", "сад", "алимент", "семья", "жен", "вдов"], "Семья: пособия, дети, жильё после утраты — разделы «Семья» и «Экстренные ситуации»."),
+    (["ветеран", "льгот", "увольн"], "Статус и льготы после службы — раздел «После службы». Увольнение — «Служба»."),
+    (["довольств", "оклад", "не плат", "зарплат", "денежн"], "Денежное довольствие и перерасчёт — «Деньги и выплаты»."),
 ]
 
 
 def main_keyboard() -> InlineKeyboardMarkup:
     rows: list[list[InlineKeyboardButton]] = []
     if WEBAPP_URL:
-        rows.append(
-            [
-                InlineKeyboardButton(
-                    text="Открыть ПравоБойца",
-                    web_app=WebAppInfo(url=WEBAPP_URL),
-                )
-            ]
-        )
-    rows.append(
-        [
-            InlineKeyboardButton(text="Позвонить", url="tel:88006000213"),
-            InlineKeyboardButton(text="Написать юристу", url=LAWYER_URL),
-        ]
-    )
+        rows.append([InlineKeyboardButton(text="Открыть ПравоБойца", web_app=WebAppInfo(url=WEBAPP_URL))])
+    rows.append([
+        InlineKeyboardButton(text="Позвонить", url="tel:88006000213"),
+        InlineKeyboardButton(text="Написать юристу", url=LAWYER_URL),
+    ])
     rows.append([InlineKeyboardButton(text=COMPANY_SITE_LABEL, url=COMPANY_SITE)])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
@@ -177,9 +138,6 @@ def start_text(first_name: str | None) -> str:
     )
 
 
-LEAD_CONSENT = ""  # заявка только для связи
-
-
 def _kb(rows: list[list[tuple[str, str]]]) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[[InlineKeyboardButton(text=t, callback_data=d) for t, d in row] for row in rows]
@@ -208,14 +166,7 @@ def waiting_keyboard(topic: str, docs: str = "none") -> InlineKeyboardMarkup:
     rows: list[list[InlineKeyboardButton]] = []
     if WEBAPP_URL:
         for aid in article_ids:
-            rows.append(
-                [
-                    InlineKeyboardButton(
-                        text=f"Статья: {aid}",
-                        web_app=WebAppInfo(url=f"{WEBAPP_URL}/article/{aid}"),
-                    )
-                ]
-            )
+            rows.append([InlineKeyboardButton(text=f"Статья: {aid}", web_app=WebAppInfo(url=f"{WEBAPP_URL}/article/{aid}"))])
     rows.append([InlineKeyboardButton(text="Написать юристу", url=LAWYER_URL)])
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
@@ -336,8 +287,8 @@ def build_dispatcher() -> Dispatcher:
         if message:
             if ADMIN_CHAT_ID:
                 try:
-                    bot = message.bot
-                    await bot.send_message(ADMIN_CHAT_ID, summary)
+                    b = message.bot
+                    await b.send_message(ADMIN_CHAT_ID, summary)
                     head = "Заявка принята. Мы свяжемся с вами в Telegram."
                 except Exception as e:
                     log.exception("admin notify failed: %s", e)
@@ -388,24 +339,22 @@ async def run_polling(bot: Bot, dp: Dispatcher) -> None:
         await bot.session.close()
 
 
+WEBHOOK_PATH = "/webhook"
+
+
 def run_webhook(bot: Bot, dp: Dispatcher) -> None:
     base = webhook_base()
     if not base:
-        raise SystemExit(
-            "Задайте WEBHOOK_BASE=https://pravoboytsa-bot.onrender.com"
-        )
+        raise SystemExit("Задайте WEBHOOK_BASE=https://pravoboytsa-bot.onrender.com")
     port = int(os.environ.get("PORT", "10000"))
     webhook_url = f"{base}{WEBHOOK_PATH}"
 
     async def on_startup(app: web.Application) -> None:
-        # Сначала снимаем старый webhook, потом ставим заново — иначе Telegram
-        # может «молчать», если URL/токен менялись или был конфликт.
         try:
             await bot.delete_webhook(drop_pending_updates=True)
             log.info("Old webhook deleted (pending dropped)")
         except Exception as e:
             log.warning("delete_webhook failed: %s", e)
-
         await bot.set_webhook(
             url=webhook_url,
             drop_pending_updates=True,
@@ -413,59 +362,91 @@ def run_webhook(bot: Bot, dp: Dispatcher) -> None:
         )
         info = await bot.get_webhook_info()
         log.info(
-            "Webhook set: url=%s pending=%s last_error_date=%s last_error=%s",
+            "Webhook set: url=%s pending=%s last_error=%s",
             info.url,
             info.pending_update_count,
-            getattr(info, "last_error_date", None),
             getattr(info, "last_error_message", None),
         )
         me = await bot.get_me()
         log.info("Bot identity: @%s id=%s", me.username, me.id)
 
     async def on_shutdown(app: web.Application) -> None:
-        log.info("Shutdown: closing bot session (webhook kept)")
+        log.info("Shutdown: closing bot session")
         await bot.session.close()
 
     async def health(_request: web.Request) -> web.Response:
         return web.Response(text="ok")
 
     async def webhook_info(_request: web.Request) -> web.Response:
-        """Диагностика: что Telegram знает про webhook этого токена."""
         try:
             info = await bot.get_webhook_info()
             me = await bot.get_me()
-            body = {
+            return web.json_response({
+                "mode": "webhook",
                 "bot": f"@{me.username}",
                 "bot_id": me.id,
                 "webhook_url": info.url,
                 "pending": info.pending_update_count,
-                "last_error_date": str(getattr(info, "last_error_date", None)),
                 "last_error_message": getattr(info, "last_error_message", None),
                 "expected_url": webhook_url,
                 "url_match": (info.url or "") == webhook_url,
-            }
-            return web.json_response(body)
+            })
         except Exception as e:
-            log.exception("webhook_info failed")
             return web.json_response({"error": str(e)}, status=500)
 
     app = web.Application()
     app.router.add_get("/", health)
     app.router.add_get("/health", health)
     app.router.add_get("/webhook-info", webhook_info)
-    SimpleRequestHandler(
-        dispatcher=dp,
-        bot=bot,
-    ).register(app, path=WEBHOOK_PATH)
+    SimpleRequestHandler(dispatcher=dp, bot=bot).register(app, path=WEBHOOK_PATH)
     setup_application(app, dp, bot=bot)
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
-
     log.info("Starting webhook server 0.0.0.0:%s url=%s", port, webhook_url)
     web.run_app(app, host="0.0.0.0", port=port, print=lambda *a, **k: None)
 
 
-WEBHOOK_PATH = "/webhook"
+async def run_polling_with_health(bot: Bot, dp: Dispatcher) -> None:
+    """Long polling + HTTP /health на PORT (чтобы Render не убивал сервис)."""
+    port = int(os.environ.get("PORT", "10000"))
+
+    async def health(_request: web.Request) -> web.Response:
+        return web.Response(text="ok")
+
+    async def status(_request: web.Request) -> web.Response:
+        try:
+            me = await bot.get_me()
+            info = await bot.get_webhook_info()
+            return web.json_response({
+                "mode": "polling",
+                "bot": f"@{me.username}",
+                "bot_id": me.id,
+                "webhook_url": info.url or "",
+                "ok": True,
+            })
+        except Exception as e:
+            return web.json_response({"ok": False, "error": str(e)}, status=500)
+
+    app = web.Application()
+    app.router.add_get("/", health)
+    app.router.add_get("/health", health)
+    app.router.add_get("/webhook-info", status)
+
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    log.info("Health server on 0.0.0.0:%s (mode=polling)", port)
+
+    await bot.delete_webhook(drop_pending_updates=True)
+    me = await bot.get_me()
+    log.info("Bot identity: @%s id=%s — starting long polling", me.username, me.id)
+
+    try:
+        await dp.start_polling(bot, allowed_updates=["message", "callback_query"])
+    finally:
+        await bot.session.close()
+        await runner.cleanup()
 
 
 def main() -> None:
@@ -474,13 +455,17 @@ def main() -> None:
     bot = Bot(BOT_TOKEN)
     dp = build_dispatcher()
 
-    if os.environ.get("PORT") or webhook_base():
-        if not webhook_base():
-            raise SystemExit(
-                "Задайте WEBHOOK_BASE=https://pravoboytsa-bot.onrender.com"
-            )
+    # По умолчанию на Render: long polling + /health (webhook на free часто молчит).
+    use_webhook = os.environ.get("USE_WEBHOOK", "").strip().lower() in ("1", "true", "yes")
+
+    if use_webhook:
+        log.info("Mode: webhook (USE_WEBHOOK=1)")
         run_webhook(bot, dp)
+    elif os.environ.get("PORT"):
+        log.info("Mode: long polling + health (Render)")
+        asyncio.run(run_polling_with_health(bot, dp))
     else:
+        log.info("Mode: long polling (local)")
         asyncio.run(run_polling(bot, dp))
 
 
