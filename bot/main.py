@@ -233,7 +233,11 @@ def build_dispatcher() -> Dispatcher:
     dp = Dispatcher()
 
     async def cmd_start(message: Message) -> None:
-        log.info("/start from id=%s", message.from_user.id if message.from_user else "?")
+        log.info(
+            "/start from id=%s username=%s",
+            message.from_user.id if message.from_user else "?",
+            getattr(message.from_user, "username", None),
+        )
         user = message.from_user
         name = user.first_name if user else None
         text = start_text(name)
@@ -293,7 +297,6 @@ def build_dispatcher() -> Dispatcher:
                 await callback.message.answer(q, reply_markup=kb)
             return
 
-        # finish without free text
         await _finish_lead(callback.message, uid, state, "")
 
     async def on_lead_text(message: Message) -> None:
@@ -302,7 +305,6 @@ def build_dispatcher() -> Dispatcher:
         uid = message.from_user.id
         state = LEADS.get(uid)
         if not state or state.get("step") != "text":
-            # ordinary chat
             hint = match_hint(message.text or "")
             if hint:
                 await message.answer(hint, reply_markup=main_keyboard())
@@ -396,13 +398,29 @@ def run_webhook(bot: Bot, dp: Dispatcher) -> None:
     webhook_url = f"{base}{WEBHOOK_PATH}"
 
     async def on_startup(app: web.Application) -> None:
+        # Сначала снимаем старый webhook, потом ставим заново — иначе Telegram
+        # может «молчать», если URL/токен менялись или был конфликт.
+        try:
+            await bot.delete_webhook(drop_pending_updates=True)
+            log.info("Old webhook deleted (pending dropped)")
+        except Exception as e:
+            log.warning("delete_webhook failed: %s", e)
+
         await bot.set_webhook(
             url=webhook_url,
-            drop_pending_updates=False,
+            drop_pending_updates=True,
             allowed_updates=["message", "callback_query"],
         )
         info = await bot.get_webhook_info()
-        log.info("Webhook set: %s (pending=%s)", info.url, info.pending_update_count)
+        log.info(
+            "Webhook set: url=%s pending=%s last_error_date=%s last_error=%s",
+            info.url,
+            info.pending_update_count,
+            getattr(info, "last_error_date", None),
+            getattr(info, "last_error_message", None),
+        )
+        me = await bot.get_me()
+        log.info("Bot identity: @%s id=%s", me.username, me.id)
 
     async def on_shutdown(app: web.Application) -> None:
         log.info("Shutdown: closing bot session (webhook kept)")
@@ -411,9 +429,30 @@ def run_webhook(bot: Bot, dp: Dispatcher) -> None:
     async def health(_request: web.Request) -> web.Response:
         return web.Response(text="ok")
 
+    async def webhook_info(_request: web.Request) -> web.Response:
+        """Диагностика: что Telegram знает про webhook этого токена."""
+        try:
+            info = await bot.get_webhook_info()
+            me = await bot.get_me()
+            body = {
+                "bot": f"@{me.username}",
+                "bot_id": me.id,
+                "webhook_url": info.url,
+                "pending": info.pending_update_count,
+                "last_error_date": str(getattr(info, "last_error_date", None)),
+                "last_error_message": getattr(info, "last_error_message", None),
+                "expected_url": webhook_url,
+                "url_match": (info.url or "") == webhook_url,
+            }
+            return web.json_response(body)
+        except Exception as e:
+            log.exception("webhook_info failed")
+            return web.json_response({"error": str(e)}, status=500)
+
     app = web.Application()
     app.router.add_get("/", health)
     app.router.add_get("/health", health)
+    app.router.add_get("/webhook-info", webhook_info)
     SimpleRequestHandler(
         dispatcher=dp,
         bot=bot,
