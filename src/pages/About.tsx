@@ -25,8 +25,8 @@ export default function About() {
           <a className="block px-4 py-3.5" href={company.emailHref}>Почта: {company.email}</a>
         </div>
         <p className="text-xs text-text-muted mt-3 leading-relaxed">
-          Для личной связи по делу пишите в Telegram {company.telegramHandle}. Информационные публикации
-          в каналах не заменяют переписку с юристом.
+          Актуальные материалы и связь — в Telegram-канале {company.telegramHandle}.
+          В сложной ситуации удобнее написать через кнопку «Написать юристу» в боте.
         </p>
       </section>
 

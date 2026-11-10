@@ -7,10 +7,23 @@
     <meta name="theme-color" content="#0B1811" />
     <title>ПравоБойца</title>
     <meta name="description" content="Права военнослужащих и их семей простым языком: выплаты, ВВК, рапорты, жалобы." />
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- async: если telegram.org недоступен (РФ), приложение не зависает -->
+    <script src="https://telegram.org/js/telegram-web-app.js" async></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* мгновенный фон, пока грузится бандл */
+      html, body { margin: 0; background: #0B1811; color: #E7EEE9; }
+      #root:empty::after {
+        content: "Загрузка…";
+        display: block;
+        text-align: center;
+        padding: 40vh 16px 0;
+        font: 15px/1.4 system-ui, sans-serif;
+        color: #8a9a90;
+      }
+    </style>
   </head>
   <body class="bg-bg-primary text-text-primary antialiased">
     <div id="root"></div>
