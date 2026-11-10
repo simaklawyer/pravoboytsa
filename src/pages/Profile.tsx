@@ -1,0 +1,145 @@
+import { Link, useNavigate } from 'react-router-dom'
+import { useUserStore, Role } from '../store/userStore'
+import { useFavoritesStore } from '../store/favoritesStore'
+import { articles } from '../data/sections'
+import { materials } from '../lib/plural'
+import BottomNav from '../components/BottomNav'
+import { CompanyCard } from '../components/CompanyCard'
+
+const roleLabels: Record<string, { title: string; icon: string }> = {
+  contract: { title: 'Контрактник', icon: '🪖' },
+  svo: { title: 'Участник СВО / мобилизованный', icon: '⭐' },
+  relative: { title: 'Жена, мать, близкий', icon: '❤️' },
+  veteran: { title: 'Ветеран / уволенный', icon: '🎗️' },
+  conscript: { title: 'Срочник или родители', icon: '🪂' },
+}
+
+const roles: Role[] = ['contract', 'svo', 'relative', 'veteran', 'conscript']
+
+export default function Profile() {
+  const { role, setRole, reset } = useUserStore()
+  const { ids, clear } = useFavoritesStore()
+  const navigate = useNavigate()
+
+  const current = role ? roleLabels[role] : null
+  const favoriteArticles = articles.filter((a) => ids.includes(a.id))
+
+  return (
+    <div className="min-h-full pb-24 safe-top">
+      <div className="px-5 pt-6 pb-4">
+        <h1 className="text-xl font-semibold">Профиль</h1>
+      </div>
+
+      <div className="px-5 mb-6">
+        <div className="card p-5 flex items-center gap-4">
+          <div className="w-14 h-14 rounded-2xl bg-accent/15 flex items-center justify-center text-3xl">
+            {current?.icon || '👤'}
+          </div>
+          <div>
+            <div className="text-sm text-text-secondary">Ваша роль</div>
+            <div className="font-semibold text-lg mt-0.5">
+              {current?.title || 'Не выбрана'}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-5 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">
+            Избранное
+          </h2>
+          {favoriteArticles.length > 0 && (
+            <button
+              onClick={clear}
+              className="text-xs text-text-muted hover:text-text-secondary"
+            >
+              Очистить
+            </button>
+          )}
+        </div>
+
+        {favoriteArticles.length === 0 ? (
+          <div className="card p-5 text-center">
+            <div className="text-2xl mb-2">☆</div>
+            <p className="text-sm text-text-secondary">
+              Пока пусто. Отмечайте статьи звёздочкой — они появятся здесь.
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {favoriteArticles.map((article) => (
+              <Link
+                key={article.id}
+                to={`/article/${article.id}`}
+                className="card p-3.5 block hover:border-accent/30 transition-all"
+              >
+                <div className="font-medium text-[15px] leading-snug">
+                  {article.title}
+                </div>
+                <div className="text-xs text-text-muted mt-1 line-clamp-1">
+                  {article.summary}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="px-5 mb-6">
+        <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
+          Сменить роль
+        </h2>
+        <div className="flex flex-col gap-2">
+          {roles.map((r) => {
+            const info = roleLabels[r!]
+            const isActive = role === r
+            return (
+              <button
+                key={r}
+                onClick={() => setRole(r)}
+                className={`card p-3.5 flex items-center gap-3 text-left transition-all
+                  ${isActive ? 'border-accent/50 bg-accent/5' : 'hover:border-border-light'}`}
+              >
+                <span className="text-xl">{info.icon}</span>
+                <span className="flex-1 font-medium text-[15px]">{info.title}</span>
+                {isActive && <span className="text-accent text-sm">✓</span>}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="px-5 mb-6">
+        <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
+          Действия
+        </h2>
+        <div className="card divide-y divide-border overflow-hidden">
+          <button
+            onClick={() => {
+              reset()
+              navigate('/')
+            }}
+            className="w-full px-4 py-3.5 text-left text-[15px] text-red-400 hover:bg-bg-elevated transition-colors"
+          >
+            Сбросить и выбрать роль заново
+          </button>
+        </div>
+      </div>
+
+      <div className="px-5">
+        <CompanyCard title="О нас и связь с юристом" />
+        <Link to="/about" className="text-sm text-accent inline-block mt-3">Контакты и связь →</Link>
+        <div className="rounded-xl bg-bg-elevated border border-border px-4 py-3 text-sm text-text-secondary leading-relaxed mt-4">
+          ПравоБойца не запрашивает ваше имя, телефон и данные Telegram-аккаунта.
+          Мы видим только анонимную статистику открытых статей.
+        </div>
+        <p className="text-center text-xs text-text-muted mt-4">
+          База знаний · справочный характер · {materials(articles.length)}
+        </p>
+      </div>
+
+      <BottomNav />
+    </div>
+  )
+}

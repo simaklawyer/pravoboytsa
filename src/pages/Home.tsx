@@ -1,0 +1,227 @@
+import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
+import { useUserStore } from '../store/userStore'
+import { useCaseStore } from '../store/caseStore'
+import { useRecentStore } from '../store/recentStore'
+import { articles, sections } from '../data/sections'
+import { materials } from '../lib/plural'
+import BottomNav from '../components/BottomNav'
+import { CompanyCta } from '../components/CompanyCard'
+
+const roleLabels: Record<string, string> = {
+  contract: 'Контрактник',
+  svo: 'Участник СВО',
+  relative: 'Близкий родственник',
+  veteran: 'Ветеран',
+  conscript: 'Срочная служба',
+}
+
+/** Подборка статей для главной: что чаще всего нужно каждой роли. */
+const recommendedByRole: Record<string, string[]> = {
+  contract: ['service-2', 'money-11', 'housing-3'],
+  svo: ['money-8', 'money-11', 'health-6'],
+  relative: ['emergency-1', 'emergency-4', 'money-9'],
+  veteran: ['money-6', 'after-1', 'legal-3'],
+  conscript: ['conscript-report', 'conscript-vvk', 'conscript-health-dismissal'],
+}
+
+const quickActions = [
+  { id: 'money', title: 'Выплаты и компенсации', subtitle: 'Что положено и как получить', icon: '💰' },
+  { id: 'housing', title: 'Жильё и ипотека', subtitle: 'НИС и военная ипотека', icon: '🏠' },
+  { id: 'health', title: 'Здоровье и ВВК', subtitle: 'ВВК, лечение, ранения', icon: '🏥' },
+  { id: 'emergency', title: 'Экстренные ситуации', subtitle: 'Пропал без вести, гибель', icon: '🚨' },
+]
+
+export default function Home() {
+  const role = useUserStore((s) => s.role)
+  const caseCount = useCaseStore((s) => s.cases.length)
+  const recentIds = useRecentStore((s) => s.ids)
+  const recent = recentIds
+    .map((id) => articles.find((a) => a.id === id))
+    .filter(Boolean)
+    .slice(0, 3)
+  const recommended = (role ? recommendedByRole[role] ?? [] : [])
+    .map((id) => articles.find((a) => a.id === id))
+    .filter(Boolean)
+
+  return (
+    <div className="min-h-full pb-24 safe-top">
+      <div className="px-5 pt-6 pb-4">
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between"
+        >
+          <div>
+            <div className="text-sm text-text-secondary">ПравоБойца</div>
+            <h1 className="text-xl font-semibold mt-0.5">
+              {role ? roleLabels[role] : 'Гость'}
+            </h1>
+          </div>
+          <Link
+            to="/profile"
+            className="w-10 h-10 rounded-full bg-bg-elevated border border-border
+                       flex items-center justify-center text-lg"
+          >
+            👤
+          </Link>
+        </motion.div>
+      </div>
+
+      <div className="px-5 mb-5">
+        <Link to="/search" className="card flex items-center gap-3 px-4 py-3.5 block border-accent/25">
+          <span className="text-accent">⌕</span>
+          <span className="text-text-muted text-[15px]">Найти статью или вопрос</span>
+        </Link>
+      </div>
+
+      <div className="px-5 mb-6">
+        <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
+          Инструменты
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <Link to="/navigator" className="tool-card hover:border-accent/50 transition-all">
+            <div className="text-lg mb-1">🧭</div>
+            <div className="text-[11px] font-medium leading-tight">Ступени</div>
+          </Link>
+          <Link to="/case" className="tool-card hover:border-accent/50 transition-all">
+            <div className="text-lg mb-1">📋</div>
+            <div className="text-[11px] font-medium leading-tight">
+              {caseCount === 0 ? 'Моё дело' : `Дела: ${caseCount}`}
+            </div>
+          </Link>
+          <Link to="/calc" className="tool-card hover:border-accent/50 transition-all">
+            <div className="text-lg mb-1">🧮</div>
+            <div className="text-[11px] font-medium leading-tight">Расчёты</div>
+          </Link>
+          <Link to="/draft" className="tool-card hover:border-accent/50 transition-all">
+            <div className="text-lg mb-1">✍️</div>
+            <div className="text-[11px] font-medium leading-tight break-words">Документы</div>
+          </Link>
+          <Link to="/contacts" className="tool-card hover:border-accent/50 transition-all">
+            <div className="text-lg mb-1">📞</div>
+            <div className="text-[11px] font-medium leading-tight">Контакты</div>
+          </Link>
+        </div>
+      </div>
+
+      {recommended.length > 0 ? (
+        <div className="px-5 mb-6">
+          <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
+            Для вас
+          </h2>
+          <div className="flex flex-col gap-2">
+            {recommended.map((article) =>
+              article ? (
+                <Link
+                  key={article.id}
+                  to={`/article/${article.id}`}
+                  className="card p-3.5 block hover:border-accent/30 transition-all"
+                >
+                  <div className="font-medium text-[14px] leading-snug">{article.title}</div>
+                  <div className="text-xs text-text-muted mt-1 leading-relaxed">
+                    {article.summary}
+                  </div>
+                </Link>
+              ) : null
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      {recent.length > 0 ? (
+        <div className="px-5 mb-6">
+          <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
+            Недавно читали
+          </h2>
+          <div className="flex flex-col gap-2">
+            {recent.map((article) =>
+              article ? (
+                <Link
+                  key={article.id}
+                  to={`/article/${article.id}`}
+                  className="text-sm text-text-primary hover:text-accent transition-colors"
+                >
+                  {article.title}
+                </Link>
+              ) : null
+            )}
+          </div>
+        </div>
+      ) : null}
+
+      <div className="px-5 mb-8">
+        <h2 className="text-sm font-medium text-text-secondary mb-3 uppercase tracking-wider">
+          Частые темы
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
+          {quickActions.map((action, i) => (
+            <motion.div
+              key={action.id}
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.05 * i }}
+            >
+              <Link
+                to={`/section/${action.id}`}
+                className="card p-4 text-left hover:border-accent/30 active:scale-[0.98] transition-all block h-full"
+              >
+                <div className="text-2xl mb-2">{action.icon}</div>
+                <div className="font-medium text-[14px] leading-snug">{action.title}</div>
+                <div className="text-xs text-text-muted mt-1">{action.subtitle}</div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-5">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-medium text-text-secondary uppercase tracking-wider">
+            Разделы
+          </h2>
+          <Link to="/sections" className="text-sm text-accent">
+            Все разделы
+          </Link>
+        </div>
+        <div className="flex flex-col gap-2.5">
+          {sections.slice(0, 5).map((section, i) => (
+            <motion.div
+              key={section.id}
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.04 * i }}
+            >
+              <Link
+                to={`/section/${section.id}`}
+                className="card p-4 flex items-center gap-3.5 text-left
+                           hover:border-accent/30 active:scale-[0.99] transition-all block"
+              >
+                <div className="w-11 h-11 rounded-xl bg-bg-elevated flex items-center justify-center text-xl">
+                  {section.icon}
+                </div>
+                <div className="flex-1">
+                  <div className="font-medium text-[15px]">{section.title}</div>
+                  <div className="text-xs text-text-muted mt-0.5">{materials(section.count)}</div>
+                </div>
+                <div className="text-text-muted">→</div>
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+
+      <div className="px-5 mt-8">
+        <CompanyCta text="Не нашли ответ или ситуация сложная? Разберём её с юристом." />
+      </div>
+
+      <div className="px-5 mt-4 mb-4">
+        <div className="rounded-xl bg-accent/10 border border-accent/20 px-4 py-3 text-sm text-accent-light">
+          🔒 Роль, избранное, чек-листы и записи в «Моём деле» хранятся только на вашем устройстве.
+        </div>
+      </div>
+
+      <BottomNav />
+    </div>
+  )
+}
