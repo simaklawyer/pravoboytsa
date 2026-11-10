@@ -39,7 +39,8 @@ logging.basicConfig(
 log = logging.getLogger("pravoboytsa-bot")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "").strip().rstrip("/") or "https://pravoboytsa.vercel.app"
+# GitHub Pages — доступен из РФ (Vercel часто блокируется)
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "").strip().rstrip("/") or "https://simaklawyer.github.io/pravoboytsa"
 COMPANY_PHONE = "8 (800) 600 02 13"
 COMPANY_TG = "https://t.me/pravoboitsa"
 COMPANY_SITE = "https://xn----7sbbdd8b6acdk7e.xn--p1ai"
@@ -197,7 +198,6 @@ def build_dispatcher() -> Dispatcher:
     async def on_call_phone(callback: CallbackQuery) -> None:
         await callback.answer()
         if callback.message:
-            # Карточка контакта: в Telegram номер нажимается и открывает звонок
             await callback.message.answer_contact(
                 phone_number="+78006000213",
                 first_name="ПравоБойца",
