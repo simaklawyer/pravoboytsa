@@ -105,7 +105,6 @@ def main_keyboard() -> InlineKeyboardMarkup:
     if WEBAPP_URL:
         rows.append([InlineKeyboardButton(text="Открыть ПравоБойца", web_app=WebAppInfo(url=WEBAPP_URL))])
     rows.append([
-        # Telegram API не принимает tel: в inline URL-кнопках
         InlineKeyboardButton(text="Позвонить", callback_data="call_phone"),
         InlineKeyboardButton(text="Написать юристу", url=LAWYER_URL),
     ])
@@ -198,9 +197,14 @@ def build_dispatcher() -> Dispatcher:
     async def on_call_phone(callback: CallbackQuery) -> None:
         await callback.answer()
         if callback.message:
+            # Карточка контакта: в Telegram номер нажимается и открывает звонок
+            await callback.message.answer_contact(
+                phone_number="+78006000213",
+                first_name="ПравоБойца",
+                last_name="горячая линия",
+            )
             await callback.message.answer(
-                f"Телефон для звонка:\n\n📞 {COMPANY_PHONE}\n\n"
-                "Нажмите на номер, чтобы скопировать, или наберите вручную."
+                f"Или наберите вручную: {COMPANY_PHONE}"
             )
 
     async def on_ask_lawyer(callback: CallbackQuery) -> None:
