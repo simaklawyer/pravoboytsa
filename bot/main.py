@@ -7,9 +7,9 @@ Render Free (Web Service): long polling + /health на PORT.
 
 Переменные:
   BOT_TOKEN, WEBAPP_URL
-  ADMIN_CHAT_ID (опц.) — чат/пользователь, куда приходят заявки из бота
-  LAWYER_URL (опц.) — если не задан, кнопка ведёт в Telegram компании
-  USE_WEBHOOK=1 (опц.) — включить webhook вместо polling
+  ADMIN_CHAT_ID (опц.)
+  LAWYER_URL (опц.)
+  USE_WEBHOOK=1 (опц.)
   WEBHOOK_BASE=https://pravoboytsa-bot.onrender.com
 """
 
@@ -105,7 +105,8 @@ def main_keyboard() -> InlineKeyboardMarkup:
     if WEBAPP_URL:
         rows.append([InlineKeyboardButton(text="Открыть ПравоБойца", web_app=WebAppInfo(url=WEBAPP_URL))])
     rows.append([
-        InlineKeyboardButton(text="Позвонить", url="tel:88006000213"),
+        # Telegram API не принимает tel: в inline URL-кнопках
+        InlineKeyboardButton(text="Позвонить", callback_data="call_phone"),
         InlineKeyboardButton(text="Написать юристу", url=LAWYER_URL),
     ])
     rows.append([InlineKeyboardButton(text=COMPANY_SITE_LABEL, url=COMPANY_SITE)])
@@ -160,9 +161,7 @@ def lead_question(step: str) -> tuple[str, InlineKeyboardMarkup]:
 
 
 def waiting_keyboard(topic: str, docs: str = "none") -> InlineKeyboardMarkup:
-    _, article_ids, template_id = TOPICS.get(topic, TOPICS["oth"])
-    if topic == "mia" and docs in ("report", "refusal"):
-        template_id = "mia-pay"
+    _, article_ids, _template_id = TOPICS.get(topic, TOPICS["oth"])
     rows: list[list[InlineKeyboardButton]] = []
     if WEBAPP_URL:
         for aid in article_ids:
@@ -195,6 +194,14 @@ def build_dispatcher() -> Dispatcher:
         if not WEBAPP_URL:
             text += "\n\n⚠️ Администратору: задайте WEBAPP_URL."
         await message.answer(text, reply_markup=main_keyboard())
+
+    async def on_call_phone(callback: CallbackQuery) -> None:
+        await callback.answer()
+        if callback.message:
+            await callback.message.answer(
+                f"Телефон для звонка:\n\n📞 {COMPANY_PHONE}\n\n"
+                "Нажмите на номер, чтобы скопировать, или наберите вручную."
+            )
 
     async def on_ask_lawyer(callback: CallbackQuery) -> None:
         await callback.answer()
@@ -309,6 +316,7 @@ def build_dispatcher() -> Dispatcher:
         await _finish_lead(callback.message, uid, state, "")
 
     dp.message.register(cmd_start, CommandStart())
+    dp.callback_query.register(on_call_phone, F.data == "call_phone")
     dp.callback_query.register(on_ask_lawyer, F.data == "ask_lawyer")
     dp.callback_query.register(on_lead_start, F.data == "lead")
     dp.callback_query.register(on_lead_flow, F.data.startswith("lf:role:"))
@@ -455,7 +463,6 @@ def main() -> None:
     bot = Bot(BOT_TOKEN)
     dp = build_dispatcher()
 
-    # По умолчанию на Render: long polling + /health (webhook на free часто молчит).
     use_webhook = os.environ.get("USE_WEBHOOK", "").strip().lower() in ("1", "true", "yes")
 
     if use_webhook:
