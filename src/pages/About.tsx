@@ -9,7 +9,7 @@ export default function About() {
         <Link to="/profile" className="text-sm text-accent">← Профиль</Link>
         <h1 className="text-xl font-semibold mt-3">О компании и связь</h1>
         <p className="text-sm text-text-secondary mt-2 leading-relaxed">
-          «ПравоБоец» помогает разобраться в правах военнослужащих и их семей. Материалы справочные.
+          «ПравоБойца» помогает разобраться в правах военнослужащих и их семей. Материалы справочные.
           В сложной ситуации обсудите документы с юристом.
         </p>
       </div>

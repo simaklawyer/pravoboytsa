@@ -64,7 +64,7 @@ export function CompanyCta({ text = 'Нужна помощь юриста по �
           rel="noreferrer"
           className="btn-secondary text-center text-sm !px-3"
         >
-          Написать в Telegram
+          Перейти в Telegram-канал
         </a>
       </div>
       <div className="mt-2 text-xs text-text-muted">{company.phone}</div>
