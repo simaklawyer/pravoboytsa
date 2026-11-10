@@ -41,11 +41,11 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
 # даже если WEBAPP_URL забыли добавить в переменные окружения хостинга.
 WEBAPP_URL = os.environ.get("WEBAPP_URL", "").strip().rstrip("/") or "https://pravoboytsa.vercel.app"
 COMPANY_PHONE = "8 (800) 600 02 13"
-COMPANY_TG = "https://t.me/Koroleva_Anastasia"
-COMPANY_SITE = "http://xn----7sbbdd8b6acdk7e.xn--p1ai"  # Право-бойца.рф
-COMPANY_SITE_LABEL = "Право-бойца.рф"
+COMPANY_TG = "https://t.me/pravoboitsa"
+COMPANY_SITE = "https://xn----7sbbdd8b6acdk7e.xn--p1ai"  # право-бойца.рф
+COMPANY_SITE_LABEL = "право-бойца.рф"
 COMPANY_EMAIL = "1000@pboitsa.ru"
-LAWYER_URL = os.environ.get("LAWYER_URL", "").strip() or COMPANY_TG
+LAWYER_URL = os.environ.get("LAWYER_URL", "").strip() or "https://t.me/pravoboitsames"
 
 
 def _int_env(name: str) -> int:
@@ -143,7 +143,7 @@ def main_keyboard() -> InlineKeyboardMarkup:
         )
     rows.append(
         [
-            InlineKeyboardButton(text="Оставить заявку", callback_data="lead"),
+            InlineKeyboardButton(text="Позвонить", url="tel:88006000213"),
             InlineKeyboardButton(text="Написать юристу", url=LAWYER_URL),
         ]
     )
@@ -165,12 +165,12 @@ def start_text(first_name: str | None) -> str:
     name = (first_name or "").strip() or "друг"
     return (
         f"Здравствуйте, {name}.\n\n"
-        "«ПравоБоец» — навигатор по правам военнослужащих, военнообязанных и их близких.\n\n"
+        "«ПравоБойца» — навигатор по правам военнослужащих, военнообязанных и их близких.\n\n"
         "В приложении пошаговые маршруты: выплаты, ВВК, жильё, льготы, рапорты и защита прав. "
         "Тексты написаны простым языком, без канцелярита.\n\n"
         "Напишите вопрос своими словами, и я подскажу, где искать ответ. "
         "Например: «не приходит довольствие», «как пройти ВВК», «муж не на связи».\n\n"
-        "Если ситуация сложная, нажмите «Оставить заявку»: четыре вопроса, и юрист свяжется с вами.\n\n"
+        "Если ситуация сложная, позвоните нам или перейдите в Telegram-канал.\n\n"
         f"Телефон: {COMPANY_PHONE}\n"
         f"Telegram: {COMPANY_TG}\n\n"
         "Материалы справочные и не заменяют очную консультацию."
