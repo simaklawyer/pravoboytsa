@@ -37,7 +37,9 @@ logging.basicConfig(
 log = logging.getLogger("pravoboytsa-bot")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
-WEBAPP_URL = os.environ.get("WEBAPP_URL", "").rstrip("/")
+# Рабочий адрес Mini App по умолчанию: кнопка в боте не пропадёт,
+# даже если WEBAPP_URL забыли добавить в переменные окружения хостинга.
+WEBAPP_URL = os.environ.get("WEBAPP_URL", "").strip().rstrip("/") or "https://pravoboytsa.vercel.app"
 COMPANY_PHONE = "8 (800) 600 02 13"
 COMPANY_TG = "https://t.me/Koroleva_Anastasia"
 COMPANY_SITE = "http://xn----7sbbdd8b6acdk7e.xn--p1ai"  # Право-бойца.рф
